@@ -1,0 +1,21 @@
+{
+    "insertMode": 0,
+    "data":
+    {
+        "name": "chest",
+        "spritePath": "chest.png",
+        "breaking":
+        {
+            "hardness": 30
+        },
+        "drops": [
+            {
+                "item": "chest",
+                "rate" : 100,
+                "shrink": 1
+            }
+        ],
+        "container": {},
+        "itc": "container"
+    }
+}

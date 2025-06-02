@@ -1,0 +1,374 @@
+{
+    "name": "Ac",
+    "maps": [
+        {
+            "name": "Main",
+            "id": "54a81cfd-af99-43dd-b628-f60c7514b884",
+            "actions": [
+                {
+                    "name": "q",
+                    "type": "Button",
+                    "id": "7f35770f-ea37-4d57-8393-2f29289b1137",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "e",
+                    "type": "Button",
+                    "id": "904d8145-d1be-423c-9329-78f7c7ac5a4a",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "leftM",
+                    "type": "Button",
+                    "id": "e7f76a1e-97cd-44e1-9ea3-0b455ed5460b",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "rightM",
+                    "type": "Button",
+                    "id": "a1a9c90b-7d63-4e57-9213-da9950267c5f",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "DebugPage",
+                    "type": "Button",
+                    "id": "28b20809-5cf9-4f86-ac99-d89b2c576050",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "CommandPage",
+                    "type": "Button",
+                    "id": "bf239ba9-98fc-4732-a943-9bf96fb41ec6",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "direction",
+                    "type": "Value",
+                    "id": "b7c5a90b-4af0-487c-8829-0d0a8486b351",
+                    "expectedControlType": "Vector3",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "mousePos",
+                    "type": "Value",
+                    "id": "29c8f00a-542b-4f93-9019-26719edcb69f",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "tab",
+                    "type": "Button",
+                    "id": "3d0cd3d2-a5b5-4fb9-b317-3349af213641",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "shift",
+                    "type": "Button",
+                    "id": "e992b0e0-5b80-4564-a50f-74a80a961249",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "enter",
+                    "type": "Button",
+                    "id": "c8d8d75d-b69b-4255-bddc-564ab34f7581",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "esc",
+                    "type": "Button",
+                    "id": "45e49ff7-26d3-42f6-9ab7-c50f1672e3ae",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "d03a1e9a-6d76-42cd-8eec-230ac33ecbed",
+                    "path": "<Keyboard>/q",
+                    "interactions": "Press",
+                    "processors": "",
+                    "groups": "",
+                    "action": "q",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "1cd30cd8-5338-47f4-8e43-5b88e8eadebf",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "MultiTap,Hold(duration=0.2),Tap",
+                    "processors": "",
+                    "groups": "",
+                    "action": "leftM",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "3dceec22-f4db-47e9-86d3-272b3f00bc58",
+                    "path": "<Keyboard>/e",
+                    "interactions": "Press",
+                    "processors": "",
+                    "groups": "",
+                    "action": "e",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "20152738-879e-4117-92b1-64931d4e2214",
+                    "path": "<Keyboard>/f3",
+                    "interactions": "Tap",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DebugPage",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "22ad581b-f9b3-457e-a529-0ed72a2c38c1",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "MultiTap,Hold(duration=0.2),Tap",
+                    "processors": "",
+                    "groups": "",
+                    "action": "rightM",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "vec3",
+                    "id": "33138b67-a694-4f07-8d15-24ffe1825f46",
+                    "path": "3DVector",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "direction",
+                    "isComposite": true,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "right",
+                    "id": "4b0e2659-0d26-4a90-9935-c6db05152b39",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "direction",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "left",
+                    "id": "437c3b3a-aa84-4570-9eb4-893ae0506791",
+                    "path": "<Keyboard>/a",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "direction",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "forward",
+                    "id": "7cfad6e4-4b5c-4ed7-83a8-632b13f2cb87",
+                    "path": "<Keyboard>/w",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "direction",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "backward",
+                    "id": "0e1c7f2a-4e32-4c82-b678-3ddec0ae3815",
+                    "path": "<Keyboard>/s",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "direction",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "032b1e08-3389-45c9-912e-6be9e936c9a8",
+                    "path": "<Mouse>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "mousePos",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b952b415-a81d-44fc-8394-2ac12110a68b",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "Tap",
+                    "processors": "",
+                    "groups": "",
+                    "action": "tab",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "06bd8d94-972f-4230-96f7-8fd7597d548e",
+                    "path": "<Keyboard>/shift",
+                    "interactions": "Press",
+                    "processors": "",
+                    "groups": "",
+                    "action": "shift",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "47c6e286-3a06-4540-af7b-a37563b4138e",
+                    "path": "<Keyboard>/f2",
+                    "interactions": "Tap",
+                    "processors": "",
+                    "groups": "",
+                    "action": "CommandPage",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d16b469b-40f6-40a3-b017-fc5280e3d72c",
+                    "path": "<Keyboard>/enter",
+                    "interactions": "Tap",
+                    "processors": "",
+                    "groups": "",
+                    "action": "enter",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a97e0d96-24f1-4586-8b81-8872ca617b34",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "Tap",
+                    "processors": "",
+                    "groups": "",
+                    "action": "esc",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "itc",
+            "id": "82d1733b-828a-4262-b134-322e73ebf146",
+            "actions": [
+                {
+                    "name": "leftM",
+                    "type": "Button",
+                    "id": "c28c184a-681a-4155-9645-0242464b7f11",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "rightM",
+                    "type": "Button",
+                    "id": "ff01c146-4b8c-4b48-8a16-38c43bc77ce2",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "d7f65ad4-47e6-4604-9659-15d31afb8738",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "Tap,Hold(duration=0.2)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "leftM",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "852cb173-4eb9-4b41-8186-3ca768d6a3b3",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "Tap,Hold(duration=0.2)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "rightM",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "start",
+            "id": "7ee7b785-4b02-48cf-bffd-50591e0525c5",
+            "actions": [
+                {
+                    "name": "esc",
+                    "type": "Button",
+                    "id": "bde48028-1cbd-4a75-8480-1788ed7d0ff5",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "a20f8ba9-08fe-49e5-a48d-2e4f71ddc8be",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "Tap",
+                    "processors": "",
+                    "groups": "",
+                    "action": "esc",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

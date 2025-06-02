@@ -1,0 +1,9 @@
+{
+    "insertMode": 0,
+    "iName":"stone",
+    "spritePath": "stone_item.png",
+    "data": {
+        "name":"stone"
+
+    }
+}

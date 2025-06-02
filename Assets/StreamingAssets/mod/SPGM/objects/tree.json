@@ -1,0 +1,20 @@
+{
+    "insertMode": 0,
+    "typeName": "tree",
+    "data":
+    {
+        "name": "tree",
+        "spritePath": "tree.png",
+        "breaking":
+        {
+            "hardness": 8
+        },
+        "drops": [
+            {
+                "item": "wood",
+                "rate" : 100,
+                "shrink": 0.2
+            }
+        ]
+    }
+}

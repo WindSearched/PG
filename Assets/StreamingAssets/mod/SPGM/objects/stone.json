@@ -1,0 +1,20 @@
+{
+    "insertMode": 0,
+    "typeName": "stone",
+    "data":
+    {
+        "name": "stone",
+        "spritePath": "stone.png",
+        "breaking":
+        {
+            "hardness": 24
+        },
+        "drops": [
+            {
+                "item": "stone",
+                "rate" : 100,
+                "shrink": 0.2
+            }
+        ]
+    }
+}

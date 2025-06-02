@@ -1,0 +1,14 @@
+{
+    "insertMode": 0,
+    "spritePath": "chest.png",
+    "data": {
+        "name":"chest",
+        "placeable": {
+            "placed": "chest"
+        },
+        "itc":[
+            0,"place",
+            0,0
+        ]
+    }
+}

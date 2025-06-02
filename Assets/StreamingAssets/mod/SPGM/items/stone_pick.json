@@ -1,0 +1,15 @@
+{
+    "insertMode": 0,
+    "iName":"stone_pick",
+    "spritePath": "stone_pick.png",
+    "data": {
+        "name":"stone_pick",
+        "itc":[
+            0,3,0,0
+        ],
+        "tool":{
+            "durability": 60,
+            "type": "pick"
+        }
+    }
+}

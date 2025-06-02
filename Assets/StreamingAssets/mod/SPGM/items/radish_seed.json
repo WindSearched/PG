@@ -1,0 +1,16 @@
+{
+    "insertMode": 0,
+    "iName":"radish_seed",
+    "spritePath": "radish_seed.png",
+    "data": {
+        "name":"radish_seed",
+        "placeable": {
+            "placed": "radish_f0",
+            "condition": "plow"
+        },
+        "itc":[
+            0,"place",
+            0,0
+        ]
+    }
+}

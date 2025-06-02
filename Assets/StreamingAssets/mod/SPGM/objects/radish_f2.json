@@ -1,0 +1,27 @@
+
+{
+    "insertMode": 0,
+    "typeName": "radish",
+    "data":
+    {
+        "name": "radish_f2",
+        "spritePath": "radish_f2.png",
+        "breaking":
+        {
+            "hardness": 5
+        },
+        "drops": [
+            {
+                "item": "radish",
+                "rate" : 100,
+                "shrink": 0.5
+            },
+            {
+                "item": "radish_seed",
+                "rate": 90,
+                "shrink": 0.4
+            }
+        ],
+        "collision": false
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "insertMode": 3,
+    "name":"iron_hoe",
+    "spritePath": "iron_hoe.png",
+    "mothernal":"stone_hoe",
+    "changers":[
+        {
+            "changedName": "name",
+            "changer": "iron_hoe"
+        },
+        {
+            "changedName": "tool.durability",
+            "changer": 240
+        }
+    ]
+}

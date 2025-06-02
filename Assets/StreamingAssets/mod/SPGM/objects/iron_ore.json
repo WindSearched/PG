@@ -1,0 +1,19 @@
+{
+    "insertMode": 0,
+    "data":
+    {
+        "name": "iron_ore",
+        "spritePath": "iron_ore.png",
+        "breaking":
+        {
+            "hardness": 50
+        },
+        "drops": [
+            {
+                "item": "iron_ore",
+                "rate" : 100,
+                "shrink": 0.2
+            }
+        ]
+    }
+}

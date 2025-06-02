@@ -1,0 +1,22 @@
+{
+    "insertMode": 0,
+    "iName":"stone_axe",
+    "spritePath": "stone_axe.png",
+    "data": {
+        "name":"stone_axe",
+        "maxAmt": 1,
+        "tool":{
+            "durability": 60,
+            "type":"axe",
+            "efficiency": 1.5,
+            "arm": true,
+            "attackAngle": 90,
+            "attackLength": 1.5,
+            "damage": 8,
+            "knockback": 50
+        },
+        "itc":[
+            "attack",0,0,0
+        ]
+    }
+}

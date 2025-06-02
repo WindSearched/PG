@@ -1,0 +1,117 @@
+[
+    {
+        "name": "forest",
+        "objects":[
+            {
+                "type":"tree",
+                "generatePossibility": 0.3
+            },
+            {
+                "type": "stone",
+                "generatePossibility": 0.1
+            },
+            {
+                "type": "grass",
+                "generatePossibility": 0.02
+            }
+        ],
+        "entities":[
+            {
+                "type": "dealer",
+                "generatePossibility": 0.5
+            }
+        ]
+    },
+    {
+        "name": "plains",
+        "objects":[
+            {
+                "type": "tree",
+                "generatePossibility": 0.05
+            },
+            {
+                "type": "stone",
+                "generatePossibility": 0.05
+            },
+            {
+                "type": "radish_f2",
+                "generatePossibility": 0.1
+            },
+            {
+                "type": "grass",
+                "generatePossibility": 0.08
+            }
+        ],
+        "entities":[
+            {
+                "type": "dealer",
+                "generatePossibility": 0.5
+            }
+        ]
+    },
+    {
+        "name": "radish_plains",
+        "objects":[
+            {
+                "type": "radish_f2",
+                "generatePossibility": 0.2
+            },
+            {
+                "type": "radish_f1",
+                "generatePossibility": 0.2
+            },
+            {
+                "type":"radish_f0",
+                "generatePossibility": 0.2
+            }
+        ],
+        "entities":[
+            {
+                "type": "dealer",
+                "generatePossibility": 0.5
+            }
+        ]
+    },
+    {
+        "name": "rock_planis",
+        "objects":[
+            {
+                "type": "stone",
+                "generatePossibility": 1
+            },
+            {
+                "type": "iron_ore",
+                "generatePossibility": 0.09
+            }
+        ]
+    },
+    {
+        "name": "light_relic",
+        "objects":[
+            {
+                "type": "light_flower_f1",
+                "generatePossibility": 0.2
+            },
+            {
+                "type": "light_flower_f0",
+                "generatePossibility": 0.2
+            },
+            {
+                "type": "light_flower_f2",
+                "generatePossibility": 0.2
+            },
+            {
+                "type": "light_flower_f3",
+                "generatePossibility": 0.2
+            },
+            {
+                "type": "light_flower_f4",
+                "generatePossibility": 0.2
+            },
+            {
+                "type": "light_ash",
+                "generatePossibility": 0.3
+            }
+        ]
+    }
+]

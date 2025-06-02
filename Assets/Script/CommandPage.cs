@@ -1,0 +1,85 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using TMPro;
+using UnityEngine;
+
+public class CommandPage : MonoBehaviour
+{
+    public TMP_InputField input;
+    public static Dictionary<string, Commanded> commands = new();
+    public void Starte()
+    {
+        Ct.command = this;
+        commands.Add("summon", (List<string> tree) =>//val => type position(0,0,0)
+        {
+            //[0]type, [1]position
+            if (!Entity.entityTypes.Contains(tree[0]))
+                return;
+            Vector3 p = tree.Count >= 2 ? SMath.V3.Parse(tree[1]) : Ct.ppw;
+            Entity.Load(tree[0], p);
+        });
+        commands.Add("load", (List<string> tree) =>
+        {//[0]name/index, [1] position
+            string n = int.TryParse(tree[0], out int ind) ? Obj.oTy[ind] : tree[0];
+            Vector3 p = tree.Count >= 2 ? SMath.V3.Parse(tree[1]) : Ct.ppw;
+            Obj.Load(n, p);
+        });
+        commands.Add("give", (List<string> tree) =>
+        {//0entity, 1item, 2amount
+            Inventory inv = null;
+            string n = tree[0];
+            if (n == "this")
+                inv = Ct.curWd.inventory;
+
+            if (inv == null)
+                return;
+            else
+            {
+                string item = tree[1];
+                int amt = int.Parse(tree[2]);
+                inv.Add(item, amt, out int full);
+                if (full > 0)
+                    Drops.Load(item, amt, Ct.ppw);
+            }
+        });
+
+        Ct.act.Main.enter.performed += c =>
+        {
+            string com = input.text;
+            input.text = "";
+            Command(com);
+        };
+    }
+    public void Command(string command)
+    {
+        if (command == "")
+            return;
+        try
+        {
+            List<string> list = command.Split(' ').ToList();
+            string c = list[0];
+            list.RemoveAt(0);
+            commands[c]?.Invoke(list);
+        }
+        catch (Exception x)
+        {
+            Debug.LogError(x.Message);
+        }
+    }
+    public void CommandByPath(string path)
+    {
+        if (!Data.FileExists(path))
+            return;
+
+        string lines = Data.LoadFile(path);
+        List<string> commands = lines.Split('\n').ToList();
+        foreach (var item in commands)
+        {
+            Command(item.TrimEnd('\n'));
+        }
+    }
+    public delegate void Commanded(List<string> tree);
+}
+
+//summon dealeer

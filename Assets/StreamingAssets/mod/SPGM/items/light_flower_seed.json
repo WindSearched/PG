@@ -1,0 +1,10 @@
+{
+    "insertMode": 0,
+    "data": {
+        "name":"light_flower_seed",
+        "placeable": {
+            "placed": "light_flower_f0",
+            "condition": "plow"
+        }
+    }
+}

@@ -1,0 +1,22 @@
+{
+    "insertMode": 0,
+    "iName":"stone_hoe",
+    "spritePath": "stone_hoe.png",
+    "data": {
+        "name":"stone_hoe",
+        "maxAmt": 1,
+        "tool":{
+            "durability": 60,
+            "type":"hoe",
+            "efficiency": 1.5
+        },
+        "placeable":
+        {
+            "placed": "plow"
+        },
+        "itc":[
+            0,"place",
+            0,0
+        ]
+    }
+}

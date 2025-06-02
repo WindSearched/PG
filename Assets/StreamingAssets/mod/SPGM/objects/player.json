@@ -1,0 +1,14 @@
+{
+    "insertMode": 0,
+    "typeName": "player",
+    "data":
+    {
+        "name": "player",
+        "spritePath": "player.png",
+        "spritePivot": 
+        {
+            "x": 0.5,
+            "y": 0.2475148
+        }
+    }
+}

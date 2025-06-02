@@ -1,0 +1,9 @@
+{
+    "insertMode": 0,
+    "iName":"iron_ore",
+    "spritePath": "iron_ore.png",
+    "data": {
+        "name":"iron_ore"
+
+    }
+}

@@ -1,0 +1,25 @@
+{
+    "insertMode": 0,
+    "data":
+    {
+        "name": "light_flower_f5",
+        "spritePath": "light_flower_f5.png",
+        "breaking":
+        {
+            "hardness": 5
+        },
+        "growaable":
+        {
+            "nextPhase": "light_flower_f6",
+            "possibility": 50
+        },
+        "drops":[
+            {
+                "item": "light_flower_seed",
+                "rate": 100,
+                "shrink": 0.8
+            }
+        ],
+        "collision": false
+    }
+}

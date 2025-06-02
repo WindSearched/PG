@@ -1,0 +1,7 @@
+{
+    "insertMode": 0,
+    "spritePath": "coin.png",
+    "data": {
+        "name":"coin"
+    }
+}

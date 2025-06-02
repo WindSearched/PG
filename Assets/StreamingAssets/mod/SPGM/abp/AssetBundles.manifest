@@ -1,0 +1,25 @@
+ManifestFileVersion: 0
+CRC: 737989269
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: button
+      Dependencies:
+        Dependency_0: silvelfont
+    Info_1:
+      Name: title
+      Dependencies: {}
+    Info_2:
+      Name: inventorypage
+      Dependencies:
+        Dependency_0: silvelfont
+    Info_3:
+      Name: dealerpage
+      Dependencies:
+        Dependency_0: silvelfont
+    Info_4:
+      Name: dealer
+      Dependencies: {}
+    Info_5:
+      Name: silvelfont
+      Dependencies: {}

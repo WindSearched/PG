@@ -1,0 +1,20 @@
+{
+    "insertMode": 0,
+    "data":
+    {
+        "name": "grass",
+        "spritePath": "grass.png",
+        "breaking":
+        {
+            "hardness": 1
+        },
+        "drops":[
+            {
+                "item": "grass_bale",
+                "rate": 100,
+                "shrink": 0.7
+            }
+        ],
+        "collision": false
+    }
+}

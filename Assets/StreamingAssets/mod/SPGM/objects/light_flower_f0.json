@@ -1,0 +1,18 @@
+{
+    "insertMode": 0,
+    "data":
+    {
+        "name": "light_flower_f0",
+        "spritePath": "light_flower_f0.png",
+        "breaking":
+        {
+            "hardness": 1
+        },
+        "growaable":
+        {
+            "nextPhase": "light_flower_f1",
+            "possibility": 50
+        },
+        "collision": false
+    }
+}

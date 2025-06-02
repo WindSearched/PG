@@ -1,0 +1,15 @@
+{
+    "insertMode": 0,
+    "spritePath": "tb.png",
+    "data": {
+        "name":"testblock",
+        "placeable":{
+            "placed": "testblock"
+        },
+        "itc":[
+            0,"place",
+            0,0
+        ]
+
+    }
+}

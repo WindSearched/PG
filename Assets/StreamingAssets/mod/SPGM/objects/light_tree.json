@@ -1,0 +1,19 @@
+{
+    "insertMode": 0,
+    "data":
+    {
+        "name": "light_tree",
+        "breaking":
+        {
+            "hardness": 114514
+        },
+        "drops": [
+            {
+                "item": "wood",
+                "rate" : 100,
+                "shrink": 0.99
+            }
+        ],
+        "itc":"light_tree"
+    }
+}

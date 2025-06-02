@@ -1,0 +1,24 @@
+{
+    "insertMode": 3,
+    "name":"iron_axe",
+    "spritePath": "iron_axe.png",
+    "mothernal":"stone_axe",
+    "changers":[
+        {
+            "changedName": "name",
+            "changer": "iron_axe"
+        },
+        {
+            "changedName": "tool.durability",
+            "changer": 240
+        },
+        {
+            "changedName": "tool.efficiency",
+            "changer": 2
+        },
+        {
+            "changedName": "tool.damage",
+            "changer": 16
+        }
+    ]
+}

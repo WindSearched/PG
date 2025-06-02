@@ -1,0 +1,32 @@
+[
+    {
+        "materials": ["axe","wood"],
+        "products": ["plank","plank","plank"]
+    },
+    {
+        "materials": ["wood","wood","wood","grass_rope","stone","stone","stone"],
+        "products": ["stone_axe"]
+    },
+    {
+        "materials":["wood","wood","grass_rope","stone","stone","stone","stone"],
+        "products":["stone_pick"]
+    },
+    {
+        "materials":["wood","wood","wood","wood","grass_rope","stone","stone"],
+        "products":["stone_hoe"]
+    },
+    {
+        "materials":["grass_bale","grass_bale","grass_bale"],
+        "products":["grass_rope"]
+    },    
+    {
+        "materials":["wood","wood","wood","wood","wood","wood","wood","wood"],
+        "products":["chest"]
+    }
+
+
+    ,{
+        "materials": ["wood"],
+        "products": ["wood","wood"]
+    }
+]

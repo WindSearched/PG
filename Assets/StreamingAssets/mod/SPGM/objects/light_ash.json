@@ -1,0 +1,12 @@
+{
+    "insertMode": 0,
+    "data":
+    {
+        "name": "light_ash",
+        "spritePath": "light_ash.png",
+        "breaking":
+        {
+            "hardness": 3
+        }
+    }
+}

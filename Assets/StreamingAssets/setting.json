@@ -1,0 +1,29 @@
+{
+  "preWorld": "deafault",
+  "quitSave": true,
+  "language": "zh",
+  "startSceneBackGround": {
+    "r": 0.0,
+    "g": 0.0,
+    "b": 0.0,
+    "a": 1.0,
+    "grayscale": 0.0,
+    "maxColorComponent": 0.0
+  },
+  "objPlaceable": {
+    "r": 0.0,
+    "g": 1.0,
+    "b": 0.0,
+    "a": 0.2,
+    "grayscale": 0.587,
+    "maxColorComponent": 1.0
+  },
+  "objCannotPlace": {
+    "r": 1.0,
+    "g": 0.0,
+    "b": 0.0,
+    "a": 0.2,
+    "grayscale": 0.299,
+    "maxColorComponent": 1.0
+  }
+}

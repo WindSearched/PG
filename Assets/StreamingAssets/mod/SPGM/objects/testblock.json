@@ -1,0 +1,28 @@
+{
+    "insertMode": 0,
+    "typeName": "testblock",
+    "data":
+    {
+        "name": "testblock",
+        "spritePath": [
+            "tb1.png",
+            "tb2.png",
+            "tb3.png",
+            "tb4.png"
+        ],
+        "breaking":
+        {
+            "hardness": 0
+        },
+        "collider":{
+            "depth":1
+        },
+        "drops": [
+            {
+                "item": "testblock",
+                "rate" : 100,
+                "shrink": 1
+            }
+        ]
+    }
+}

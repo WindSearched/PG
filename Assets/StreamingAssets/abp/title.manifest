@@ -1,0 +1,38 @@
+ManifestFileVersion: 0
+CRC: 4221344293
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: d4d934f1d66cf07e2a2a45a492d775ec
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 24ec485038f82629a5f5b4714e39a490
+  IncrementalBuildHash:
+    serializedVersion: 2
+    Hash: d4d934f1d66cf07e2a2a45a492d775ec
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: b7c12d80db741214eaeae6cb76c21354, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+- Class: 222
+  Script: {instanceID: 0}
+- Class: 224
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers:
+- AssemblyName: UnityEngine.CoreModule
+  ClassName: UnityEngine.Events.PersistentCallGroup
+- AssemblyName: UnityEngine.UI
+  ClassName: UnityEngine.UI.MaskableGraphic/CullStateChangedEvent
+Assets:
+- Assets/Editor/title.prefab
+Dependencies: []

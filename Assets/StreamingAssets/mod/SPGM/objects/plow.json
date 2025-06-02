@@ -1,0 +1,14 @@
+{
+    "insertMode": 0,
+    "typeName": "plow",
+    "data":
+    {
+        "name": "plow",
+        "spritePath": "plow.png",
+        "breaking":
+        {
+            "hardness": 2
+        },
+        "collision": false
+    }
+}

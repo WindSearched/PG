@@ -1,0 +1,23 @@
+//main => Test 1 changes 更新//
+ch-zh: 
+玩家移动从characterController.Move改用rigidbody.veloocity，玩家y值不会偏移了
+为开始界面添加更新简述（changes）和扩展（mod）界面
+添加了部分unicode字体（FF00-FFFF，256行）
+obj的碰撞体不再随着相机朝向
+碰撞体的z轴不再为0.2而是自定义（默认0.3）
+加入创建及访问世界的界面（在startscene)
+添加世界的预加载（一个指令块），可以用于加载世界时的一些必要指令
+将world的obj存储（ObjState）的信息存储类型改成object(注：类型必须serializable)
+为obj添加四向图片的可能，从最初放置的角度开始每90度一张；为放置方法中添加保存初始角度的操作
+
+添加load（obj）(name,position)和give(entity,item,amount)指令
+en:
+Player movement changed from characterController.Move to rigidbody.veloocity, the player's y value will not be offset
+Added update summary (changes) and expansion (mod) page to the start scene
+Added partial unicode fonts (FF00-FFFF, 256 lines)
+
+
+unicode来源：https://www.qqxiuzi.cn
+这个游戏使用silver字体：https://poppyworks.itch.io/silver
+作者b站：https://b23.tv/94w9osw
+作者gitHub: https://github.com/WindSearched
