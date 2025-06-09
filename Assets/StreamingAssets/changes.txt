@@ -10,7 +10,8 @@ obj的碰撞体不再随着相机朝向
 将world的obj存储（ObjState）的信息存储类型改成object(注：类型必须serializable)
 将obj的sprite可动画化，并可以四向化（即在四个方向有不同的sprite）
 添加load（obj）(name,position)和give(entity,item,amount)指令
-添加可为item添加描述的和各语言名称的功能
+添加可为item添加描述的和各语言名称的功能,可以从json里编写，或者mod文件夹里的texts.json
+优化破坏代码，可以连续破坏了
 
 en:
 Player movement changed from characterController.Move to rigidbody.veloocity, the player's y value will not be offset

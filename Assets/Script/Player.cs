@@ -49,13 +49,14 @@ public class Player : MonoBehaviour
         Ct.cam.Following(transform.position);
         plane.transform.position = transform.position;
     }
+    public Coroutine cor;
     public void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("drop"))
         {
             Drops d = other.GetComponent<Drops>();
             d.toApproach = true;
-            Ct.ct.CT(d.Approaching());
+            cor = Ct.ct.CT(d.Approaching());
         }
         else if (other.gameObject.CompareTag("entity"))
         {
@@ -69,7 +70,14 @@ public class Player : MonoBehaviour
             entitiesAround.Remove(other.GetComponent<Entity>()); ;
         }
     }
-
+    private void OnDisable()
+    {
+        if(cor != null)
+        {
+            Ct.ct.Cta(cor);
+            cor = null;
+        }
+    }
     public Vector3 DirectionAdjustment()
     {
         float a = Ct.curWd.camAngle;

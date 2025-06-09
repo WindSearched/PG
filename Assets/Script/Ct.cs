@@ -979,8 +979,42 @@ public static class TextManager
     {
         if(!Data.FileExists(path))
             return;
+        string langue = null, prex = "", key = "", val = "";
 
+        foreach(var line in File.ReadAllLines(path))
+        {
+            string[] pt = line.Split('/');
+            if (pt.Length != 2)
+                continue;
+            if (line[0] == '#')
+            {
+                string p = pt[0].TrimStart('#');
+                switch(p)
+                {
+                    case "l":
+                        langue = pt[1];
+                        break;
+                    case "p":
+                        prex = pt[1];
+                        break;
+                }
+            }
+            else
+            {
+                if(langue == null)
+                    continue;
+                key = pt[0];
+                val = pt[1];
+
+                AddText(langue, prex + key, val);
+            }
+        }
     }
+    /*
+    #l/zh-cn
+    #p/itname
+    glass/²£Á§
+     */
     public static string Read(string langue, string key)
     {
         if (ExistLangue(langue))

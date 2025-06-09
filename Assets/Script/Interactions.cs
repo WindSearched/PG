@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Interactions;
@@ -13,10 +14,12 @@ public class Interactions : MonoBehaviour
     {
         Ct.act.itc.rightM.performed +=
             c => MouseInt(c, false);
+
+
         Ct.act.itc.leftM.performed +=
             c => MouseInt(c, true);
-        Ct.act.Main.rightM.canceled += c => right = State.relase;
-        Ct.act.Main.leftM.canceled += c => left = State.relase;
+        Ct.act.itc.rightM.canceled += c => right = State.relase;
+        Ct.act.itc.leftM.canceled += c => left = State.relase;
     }
 
 
@@ -62,7 +65,7 @@ public class Interactions : MonoBehaviour
             {
                 this.left = State.hold;
                 Item.Interact(Item.InteractionType.leftpress, d);
-                Ct.ct.CT(Breaking());
+                breakCor = Ct.ct.CT(Breaking());
             }
             else
             {
@@ -71,18 +74,25 @@ public class Interactions : MonoBehaviour
             }
         }
     }
+    public Coroutine breakCor;
     public IEnumerator Breaking()
     {
-        GameObject o = Ct.ct.ray;
+        float curMar = 0.5f;
+        GameObject o = null;
+        Material m = null;
+        ObjData d = null;
+
+        o = Ct.ct.ray;
         if (o.CompareTag("Object"))
         {
-            ObjData d = Obj.data[o.GetComponent<Obj>().index];
-            Material m = o.GetComponentInChildren<SpriteRenderer>().material;
+            d = Obj.data[o.GetComponent<Obj>().index];
+            m = o.GetComponentInChildren<SpriteRenderer>().material;
+            curMar = 0.5f;
+        }
 
-
-            float curMar = 0.5f;
-
-            while (left != State.relase)
+        while (left != State.relase)
+        {
+            if (o == Ct.ct.ray && o!= null && o.CompareTag("Object"))
             {
                 float remMar = mar / d.breaking.hardness * Time.deltaTime;
                 curMar += remMar;
@@ -92,11 +102,25 @@ public class Interactions : MonoBehaviour
                 {
                     Obj.GetData(o.GetComponent<Obj>().ld.name).GetDrops(o.transform.position);
                     Destroy(o);
-                    yield break;
+                    yield return new WaitForEndOfFrame();
+                    o = null;
+                    continue;
                 }
-                yield return null;
             }
-
+            else
+            {
+                o = Ct.ct.ray;
+                if (o != null && o.CompareTag("Object"))
+                {
+                    d = Obj.data[o.GetComponent<Obj>().index];
+                    m = o.GetComponentInChildren<SpriteRenderer>().material;
+                    curMar = 0.5f;
+                }
+            }
+            yield return null;
+        }
+        if(o != null && o.CompareTag("Object"))
+        {
             m.SetFloat("_lineWidth", 0.5f);
         }
     }

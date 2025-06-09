@@ -102,7 +102,10 @@ public class InventoryPage : MonoBehaviour
         Ct.mouseSelected.select = g;
         Ct.mouseSelected.WhenSwitch();
     }
-
+    private void OnDisable()
+    {
+        APointed();
+    }
 
     public void Pointed(GameObject obj)
     {

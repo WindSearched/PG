@@ -1,0 +1,12 @@
+#l/en
+#p/itname_
+stone/stone
+
+#p/itdescrp_
+stone/base element
+
+#l/zh-cn
+stone/石头
+
+#p/itname_
+stone/基础的材料

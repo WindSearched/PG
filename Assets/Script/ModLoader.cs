@@ -281,6 +281,7 @@ public static class Mod
             }
 
             WorldGenerator.LoadingFromPath(p + "/biomes.json");
+            TextManager.AddTextFromFile(p + "/texts.txt");
 
             LoadDLL(p + "/" + curLoadModName + ".dll");
             Crafting.Load(Data.ReadJson<Recipe[]>(p + "/recipes.json"));

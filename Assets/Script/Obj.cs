@@ -1,3 +1,4 @@
+using IPGModAPI;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -51,7 +52,7 @@ public class Obj : MonoBehaviour
     public Vector2Int cp;
     public ObjData dt;
     public Chunk.ObjState state;
-
+    public dPGM onDestroy;
     public virtual void Start()
     {
         c++;
@@ -428,7 +429,7 @@ public class Obj : MonoBehaviour
 
     private void OnDestroy()
     {
-
+        onDestroy?.Invoke();
         Ct.evn.WhenVisionRotating -= ChangeVision;
         Ct.evn.WhenVisionElevate -= ChangeVision;
     }
