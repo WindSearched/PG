@@ -4,18 +4,17 @@
     "data":
     {
         "name": "testblock",
-        "spritePath": [
-            "tb1.png",
-            "tb2.png",
-            "tb3.png",
-            "tb4.png"
-        ],
+        "spritePath": {
+            "content": "tb",
+            "folder" : "sprites/obj",
+            "towardable": true
+        },
         "breaking":
         {
             "hardness": 0
         },
         "collider":{
-            "depth":1
+            "depth": 1
         },
         "drops": [
             {

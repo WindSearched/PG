@@ -3,7 +3,25 @@
     "iName":"wood",
     "spritePath": "wood.png",
     "data": {
-        "name":"wood"
-
-    }
+        "name":"wood",
+        "burnPw": 10
+    },
+         "nameOfLangue": [
+        {
+            "langue":"en",
+            "text": "grass bale"
+        },{
+            "langue":"zh-cn",
+            "text": "木头"
+        }
+    ],
+    "description":[
+        {
+            "langue":"en",
+            "text": "the most basic item, with many uses: can be used as a tool or burnt"
+        },{
+            "langue":"zh-cn",
+            "text": "最基础的物品，有很多用途：既可以做工具也可以燃烧"
+        }
+    ]
 }

@@ -22,6 +22,10 @@
     {
         "materials":["wood","wood","wood","wood","wood","wood","wood","wood"],
         "products":["chest"]
+    },
+    {
+        "materials":["stone","stone","stone","stone","stone","stone","stone","stone","stone","stone"],
+        "products":["kiln"]
     }
 
 

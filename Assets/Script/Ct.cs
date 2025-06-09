@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
+using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -31,6 +32,22 @@ public class Ct : MonoBehaviour
     public Transform objects;
     public Transform destroyedObjects;
     public Transform chestView;
+    public TextMeshProUGUI pointedName;
+    public TextMeshProUGUI pointedDescription;
+    public string PointedName
+    {
+        set
+        {
+            pointedName.text = value;
+        }
+    }
+    public string PointedDescription
+    {
+        set
+        {
+            pointedDescription.text = value;
+        }
+    }
 
     public static Inventory selectContainerInv;
 
@@ -83,6 +100,7 @@ public class Ct : MonoBehaviour
     /// prelload obj
     /// </summary>
     public static PreloadObj po;
+    public static FadeUIManager fadeUIManager;
     private void Start()
     {
         act.Main.leftM.performed +=
@@ -167,6 +185,9 @@ public class Ct : MonoBehaviour
         Obj.LoadDefualtInteractions();
 
         evn.BeforeGameSave += () => { curWd.plyPos = player.transform.position; };
+
+        invp.SStart();
+        NoteManager.Init(canvas.Find("notes"));
         //
         //finish preload
         //
@@ -233,8 +254,7 @@ public class Ct : MonoBehaviour
             return this.ray;
 
         Ray ray = Camera.main.ScreenPointToRay(mP);
-        RaycastHit hit;
-        if (Physics.Raycast(ray, out hit, Mathf.Infinity, ~0, QueryTriggerInteraction.Ignore) && hit.collider.gameObject != this.ray)
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, ~0, QueryTriggerInteraction.Ignore) && hit.collider.gameObject != this.ray)
         {
             preRay = this.ray;
             this.ray = hit.collider.gameObject;
@@ -338,9 +358,13 @@ public class Ct : MonoBehaviour
     /// Start couroutine
     /// </summary>
     /// <param name="e"></param>
-    public void CT(IEnumerator e)
+    public Coroutine CT(IEnumerator e)
     {
-        StartCoroutine(e);
+        return StartCoroutine(e);
+    }
+    public void Cta(Coroutine cr)
+    {
+        StopCoroutine(cr);
     }
     public static void GetScale(Vector2 size)
     {
@@ -806,10 +830,8 @@ public static class Data
     public static void WriteBinary<T>(T data, string path)
     {
         BinaryFormatter formatter = new();
-        using (FileStream stream = new(path, FileMode.Create))
-        {
-            formatter.Serialize(stream, data);
-        }
+        using FileStream stream = new(path, FileMode.Create);
+        formatter.Serialize(stream, data);
     }
     public static T ReadBinary<T>(string path)
     {
@@ -817,11 +839,9 @@ public static class Data
         if (!FileExists(path))
             return default;
 
-        BinaryFormatter formatter = new BinaryFormatter();
-        using (FileStream stream = new(path, FileMode.Open))
-        {
-            return (T)formatter.Deserialize(stream);
-        }
+        BinaryFormatter formatter = new();
+        using FileStream stream = new(path, FileMode.Open);
+        return (T)formatter.Deserialize(stream);
     }
     public static string ReadTextFile(string filePath)
     {
@@ -916,7 +936,94 @@ public static class Data
             File.Delete(path);
     }
 }
-
-
-
 public delegate void SMethod();
+
+
+public static class TextManager
+{
+    public static Dictionary<string, Dictionary<string, string>> manager = new();
+    public static List<string> languages = new();
+    public static string curLangue = Ct.set.language;
+
+    public static void AddLangue(string language)
+    {
+        if(!ExistLangue(language))
+        {
+            languages.Add(language);
+            manager.Add(language, new());
+        }
+    }
+    public static void ChangeLangue(string language)
+    {
+        if (ExistLangue(language))
+            curLangue = language;
+        else
+        {
+
+            return;
+        }
+    }
+    public static bool ExistLangue(string language) => languages.Contains(language);
+    public static void AddText(string langue,string key, string text, bool addLangue = true)
+    {
+        if(!ExistLangue(langue))
+        {
+            if (addLangue)
+                AddLangue(langue);
+            else
+                return;
+        }
+        manager[langue].Add(key, text);
+    }
+    public static void AddTextFromFile(string path)
+    {
+        if(!Data.FileExists(path))
+            return;
+
+    }
+    public static string Read(string langue, string key)
+    {
+        if (ExistLangue(langue))
+        {
+            var dic = manager[langue];
+            if(dic.ContainsKey(key))
+            {
+                return dic[key];
+            }
+        }
+        return null;
+    }
+    /// <summary>
+    /// particular read 
+    /// </summary>
+    /// <param name="isItem">if is item or obj</param>
+    /// <param name="isName">if is name or desscription</param>
+    /// <returns></returns>
+    public static string Read(bool isItem, bool isName, string key)
+    {
+        string k = isItem ? "it" : "ob";
+        k += isName ? "name" : "descrp";
+        k += "_" + key;
+
+        return Read(k);
+    }
+    /// <summary>
+    /// read the text, by burrent language
+    /// </summary>
+    /// <param name="key"></param>
+    /// <returns></returns>
+    public static string Read(string key) =>  Read(curLangue, key);
+
+    public class Text
+    {
+        public string langue;
+        public string key;
+        public string text;
+
+        /// <summary>
+        /// Add to text manager
+        /// </summary>
+        /// <param name="addLangue">add langue if it is not exist</param>
+        public void AddTo(bool addLangue = true) => AddText(langue, key, text, addLangue);
+    }
+}

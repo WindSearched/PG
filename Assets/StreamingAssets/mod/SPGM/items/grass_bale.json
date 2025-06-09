@@ -2,6 +2,16 @@
     "insertMode": 0,
     "spritePath": "grass_bale.png",
     "data": {
-        "name":"grass_bale"
-    }
+        "name":"grass_bale",
+        "burnPw": 1
+    },   
+     "nameOfLangue": [
+        {
+            "langue":"en",
+            "text": "grass bale"
+        },{
+            "langue":"zh-cn",
+            "text": "草捆"
+        }
+    ]
 }

@@ -2,6 +2,25 @@
     "insertMode": 0,
     "spritePath": "grass_rope.png",
     "data": {
-        "name":"grass_rope"
-    }
+        "name":"grass_rope",
+        "burnPw": 3
+    },
+         "nameOfLangue": [
+        {
+            "langue":"en",
+            "text": "grass rope"
+        },{
+            "langue":"zh-cn",
+            "text": "草绳"
+        }
+    ],
+    "description":[
+        {
+            "langue":"en",
+            "text": "made from grass, can be used to craft tools"
+        },{
+            "langue":"zh-cn",
+            "text": "用草制作而成，可以用来制作工具"
+        }
+    ]
 }

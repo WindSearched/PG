@@ -1,0 +1,31 @@
+{
+    "insertMode": 0,
+    "spritePath": "obj/kiln,burn,0,.png",
+    "data": {
+        "name":"kiln",
+        "placeable": {
+            "placed": "kiln"
+        },
+        "itc":[
+            0,"place",
+            0,0
+        ]
+    },
+    "description":[
+    {
+        "langue":"en",
+        "text": "can to use for smelt something"
+    },{
+        "langue":"zh-cn",
+        "text": "再靠近点就会融化"
+    }],
+    "nameOfLangue": [
+    {
+        "langue":"en",
+        "text": "kiln"
+    },{
+        "langue":"zh-cn",
+        "text": "yao炉"
+    }
+    ]
+}

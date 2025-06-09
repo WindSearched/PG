@@ -3,5 +3,23 @@
     "spritePath": "coin.png",
     "data": {
         "name":"coin"
-    }
+    },
+    "nameOfLangue": [
+        {
+            "langue":"en",
+            "text": "chest"
+        },{
+            "langue":"zh-cn",
+            "text": "硬币"
+        }
+    ],
+    "description":[
+        {
+            "langue":"en",
+            "text": "coins made of unknown metal"
+        },{
+            "langue":"zh-cn",
+            "text": "以不知名金属制成的硬币"
+        }
+    ]
 }

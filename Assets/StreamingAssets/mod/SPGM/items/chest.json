@@ -10,5 +10,23 @@
             0,"place",
             0,0
         ]
-    }
+    },
+    "nameOfLangue": [
+        {
+            "langue":"en",
+            "text": "chest"
+        },{
+            "langue":"zh-cn",
+            "text": "箱子"
+        }
+    ],
+    "description":[
+        {
+            "langue":"en",
+            "text": "loading things"
+        },{
+            "langue":"zh-cn",
+            "text": "“胸部”"
+        }
+    ]
 }

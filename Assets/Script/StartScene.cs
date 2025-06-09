@@ -30,9 +30,12 @@ public class StartScene : MonoBehaviour
     public Transform modPageParent;
     public InputAction ia = new(name: "Tap", type: InputActionType.Button, binding: "<Keyboard>/Escape");
     public GameObject actived;
+    public FadeUIManager fadeUIManager;
     private void Start()
     {
         parent = GameObject.Find("Canvas/add").transform;
+        fadeUIManager = GetComponent<FadeUIManager>();
+        NoteManager.Init(transform.Find("notes"));
         prt = parent.GetComponent<RectTransform>();
 
         GetScale();
@@ -196,12 +199,7 @@ public class StartScene : MonoBehaviour
             if (Data.DIrectioryExists(p))
                 Data.Delete(p);
             Data.CopyAll(path[0], p);
-
-            //}
-            //catch (Exception ex)
-            //{
-            //    Debug.LogError(ex.Message);
-            //}
+            NoteManager.Load($"load mod {di.Name}");
         }
     }
     public void ChangesButton()

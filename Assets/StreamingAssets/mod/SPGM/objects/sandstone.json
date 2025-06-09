@@ -1,0 +1,19 @@
+{
+    "insertMode": 0,
+    "data":
+    {
+        "name": "sandstone",
+        "spritePath": "sandstone.png",
+        "breaking":
+        {
+            "hardness": 20
+        },
+        "drops": [
+            {
+                "item": "sand",
+                "rate" : 100,
+                "shrink": 0.4
+            }
+        ]
+    }
+}

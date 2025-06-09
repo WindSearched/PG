@@ -1,8 +1,6 @@
 ﻿using IPGModAPI;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using UnityEngine;
 /// <summary>
@@ -24,6 +22,8 @@ public static class Mod
     {
         public InsertMode insertMode;
         public ItemData data;
+        public TextManager.Text[] nameOfLangue;
+        public TextManager.Text[] description;
 
         public string spritePath;
         /// <summary>
@@ -40,7 +40,7 @@ public static class Mod
 
         public void AddTo(string modName)
         {
-            string name = data == null? this.name : data.name;
+            string name = data == null ? this.name : data.name;
 
             switch (insertMode)
             {
@@ -68,12 +68,36 @@ public static class Mod
                 Debug.LogError("[ModLoader]do not exist the item : " + name);
             }
         }
+        public void AddTexts()
+        {
+            if(nameOfLangue != null)
+            {
+                string key = "itname_" + data.name;
+                foreach(var v in nameOfLangue)
+                {
+                    v.key = key;
+                    v.AddTo();
+                }
+            }
+            if(description != null)
+            {
+                string key = "itdescrp_" + data.name;
+                foreach (var v in description)
+                {
+                    v.key = key;
+                    v.AddTo();
+                }
+            }
+        }
+
     }
     [Serializable]
     public class Object
     {
         public InsertMode insertMode;
         public ObjData data;
+        public TextManager.Text[] description;
+        public TextManager.Text[] name;
         /// <summary>
         /// use when 
         /// </summary>
@@ -103,27 +127,38 @@ public static class Mod
                     break;
 
             }
-            ObjSprite sprite = new(data, modName);
-            data.collider.size = SMath.Spr.GetValidPixels(sprite.Get());
 
-            if (data.spritePivot == new Vector2(-1, -1))//set pivot at bottom center
-            {
-                Rect r = data.collider.size;
-                Vector2 pi = new Vector2(r.x + r.width * 0.5f, r.y) / SMath.Spr.pxPerUnit;
-                for(int i = 0; i < sprite.sprites.Count; i++)
-                {
-                    sprite.Set(i, Sprite.Create(sprite.Get(i).texture, sprite.Get(i).rect, pi, SMath.Spr.pxPerUnit));
-                }
-                Debug.Log(pi);
-            }
+            SpriteManager sm = SpriteManager.Load(data.spriteobj);
+            data.collider.size = SMath.Spr.GetValidPixels(sm.Get());
 
             try
             {
-                Obj.SetSprite(data.name, sprite);
+                Obj.SetSprite(data.name, sm);
             }
             catch
             {
                 Debug.LogError("[ModLoader]do not extst the obj : " + data.name);
+            }
+        }
+        public void AddText()
+        {
+            if (name != null)
+            {
+                string key = "obname_"+ data.name ;
+                foreach(var v in name)
+                {
+                    v.key = key;
+                    v.AddTo();
+                }
+            }
+            if (description != null)
+            {
+                string key = "obdescrp_"+ data.name;
+                foreach (var v in description)
+                {
+                    v.key = key;
+                    v.AddTo();
+                }
             }
         }
     }
@@ -199,17 +234,12 @@ public static class Mod
         return LoadSprite(path, new Vector2(0.5f, 0.5f));
     }
     public static Sprite LoadSprite(string modName, MItem data)
-    {
-        string a = "";
-        if(data.spritePath == null)
-            a = data.data.name + ".png";
-        else
-            a = data.spritePath;
-
-        string p = modPath + modName + "/sprites/" + a;
+    { 
+        string s = data.spritePath == null ? data.data.name + ".png" : data.spritePath;
+        string p = modPath + modName + "/sprites/" + s;
         try
         {
-           return LoadSprite(p, data.ppu);
+            return LoadSprite(p, data.ppu);
         }
         catch
         {
@@ -247,6 +277,7 @@ public static class Mod
                     continue;
                 MItem d = Data.ReadJson<MItem>(ppp);
                 d.AddTo(curLoadModName);
+                d.AddTexts();
             }
 
             WorldGenerator.LoadingFromPath(p + "/biomes.json");
@@ -278,13 +309,4 @@ public static class Mod
         else
             Debug.Log("[ModLoader]Do not found the dll: " + path);
     }
-}
-
-[Serializable]
-public class AnimatedSprite
-{
-    public List<ObjSprite> sprites = new();
-    public List<float> pauses;
-    public List<int> frames;
-
 }

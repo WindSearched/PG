@@ -1,0 +1,14 @@
+{
+    "insertMode": 0,
+    "spritePath": "sand.png",
+    "data": {
+        "name":"sand",
+        "trasformables":{
+            "burn":{
+                "trasformed": "glass",
+                "degree": 8,
+                "time": 5
+            }
+        }
+    }
+}

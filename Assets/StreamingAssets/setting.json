@@ -1,7 +1,7 @@
 {
   "preWorld": "deafault",
   "quitSave": true,
-  "language": "zh",
+  "language": "zh-cn",
   "startSceneBackGround": {
     "r": 0.0,
     "g": 0.0,

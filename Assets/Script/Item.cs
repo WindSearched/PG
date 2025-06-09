@@ -116,15 +116,16 @@ public class Item
             default:
                 return;
         }
-        if (data.IsTool())
-            Ct.mouseSelected.Fray(1);
-        else
-            Ct.mouseSelected.Remove(1);
-
 
         string s = data.IctDet(i);
         if (s != null)
+        {
             interactions[s].Invoke(data);
+            if (data.IsTool())
+                Ct.mouseSelected.Fray(1);
+            else
+                Ct.mouseSelected.Remove(1);
+        }
     }
     public static void InctInitializzation()
     {
@@ -189,12 +190,13 @@ public class ItemData
     /// /Has 4 interactions: lefttap, righttap, leftpress, rightpress
     /// </summary>
     public object[] itc = new object[4];
-    public string[] tags;
+    public List<string> tags;
 
     public Placeable placeable;
     public Tool tool;
     public Consumable consumable;
-
+    public Dictionary<string, Trasformable> trasformables = new();
+    public int burnPw;
     public enum Interaction
     {
         n,
@@ -230,7 +232,13 @@ public class ItemData
     {
         public string[] effects;
     }
-
+    [Serializable]
+    public class Trasformable
+    {
+        public string trasformed;
+        public float degree;
+        public float time;
+    }
 
     public bool IsTool() => tool != null;
     public string IctDet(int index)

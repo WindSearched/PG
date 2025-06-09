@@ -2,8 +2,10 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Obj : MonoBehaviour
@@ -20,7 +22,9 @@ public class Obj : MonoBehaviour
     /// <summary>
     /// all sprites of every object
     /// </summary>
-    public static List<ObjSprite> sprites = new();
+    //public static List<ObjSprite> sprites = new();
+    public static List<SpriteManager> sprites = new();
+
     public static Dictionary<string, Interaction> interactions = new();
 
 
@@ -47,13 +51,14 @@ public class Obj : MonoBehaviour
     public Vector2Int cp;
     public ObjData dt;
     public Chunk.ObjState state;
+
     public virtual void Start()
     {
         c++;
 
         if (!CompareTag("Player"))
         {
-            if(CompareTag("Object"))
+            if (CompareTag("Object"))
             {
                 transform.parent = Ct.ct.objects.transform;
             }
@@ -123,12 +128,15 @@ public class Obj : MonoBehaviour
     public static void LoadDefualtInteractions()
     {
         interactions.Add("container", Container);
+        interactions.Add("burn", Burn);
 
-        Page.Add("container", () => {
+        Page.Add("container", () =>
+        {
             Ct.DestroyAll(Ct.ct.chestView);
             Ct.ct.chestView.gameObject.SetActive(true);
             Ct.ct.invp.gameObject.SetActive(true);
-        }, () => {
+        }, () =>
+        {
             Ct.ct.chestView.gameObject.SetActive(false);
             Ct.ct.invp.gameObject.SetActive(false);
             Ct.selectContainerInv.WhenInvChange -= InventoryPage.OnUpdate;
@@ -141,7 +149,7 @@ public class Obj : MonoBehaviour
         if (Ct.ct.chestView.childCount != 0)
             Debug.Log("nonononon");
         Chunk.ObjState state = obj.state;
-        if(!state.states.ContainsKey("container"))
+        if (!state.states.ContainsKey("container"))
         {
             state.Regist("container", new Inventory(data.container.cell));
         }
@@ -152,32 +160,94 @@ public class Obj : MonoBehaviour
         GameObject grid = Resources.Load("chestgrid") as GameObject;
         int x, y, len = 49;
 
-        for(int i = 0; i < inv.invt.Count; i++)
+        for (int i = 0; i < inv.invt.Count; i++)
         {
             y = i / 4;
             x = i % 4;
             GameObject g = Instantiate(grid, Ct.ct.chestView);
             g.name = i.ToString();
-            g.GetComponent<RectTransform>().localPosition = new(x * len - len *2, -y * len + len * 2);
+            g.GetComponent<RectTransform>().localPosition = new(x * len - len * 2, -y * len + len * 2);
             SButton sb = g.GetComponent<SButton>();
             sb.onClick.AddListener(() => { inv.Switch(int.Parse(g.name), Ct.mouseSelected.select, out Ct.mouseSelected.select); Ct.mouseSelected.WhenSwitch(); });
         }
         inv.Invchange();
-    } 
+    }
+    public static void Burn(ObjData data, Obj obj)
+    {
+        if (Ct.mouseSelected.select.amt <= 0)
+            return;
+
+        ItemData id = Item.GetData(Ct.mouseSelected.select.item);
+        string burner = "burner", burnable = "burnable";
+
+        Chunk.ObjState state = obj.state;
+
+
+        if (!state.states.ContainsKey(burner))
+            state.Regist(burner, new List<string>(16));
+        List<string> burners = state.GetState(burner) as List<string>;
+        if (!state.states.ContainsKey(burnable))
+            state.Regist(burnable, new List<string>(16));
+        List<string> burnables = state.GetState(burnable) as List<string>;
+
+        if (id.burnPw != 0 && burners.Count < 16)
+        {
+            burners.Add(Ct.mouseSelected.select.item);
+            Ct.mouseSelected.select.Add(-1, out _);
+        }
+        else if (id.trasformables.ContainsKey("burn") && burnables.Count < 16)
+        {
+            burnables.Add(Ct.mouseSelected.select.item);
+            Ct.mouseSelected.select.Add(-1, out _);
+        }
+        state.states[burner] = burners;
+        state.states[burnable] = burnables;
+
+
+        Ct.ct.CT(Burning());
+    }
+    public static System.Collections.IEnumerator Burning()
+    {
+        Obj obj = Ct.ct.ray.GetComponent<Obj>();
+        Chunk.ObjState state = obj.state;
+        float power = 0;
+        List<string> bb = state.GetState("burnable") as List<string>;
+        List<string> br = state.GetState("burner") as List<string>;
+        obj.Animated = sprites[obj.index].Get("burn", (SpriteManager.Toward)0);
+        while (true)
+        {
+            if (bb.Count == 0) break;
+            ItemData.Trasformable idt = Item.GetData(bb[0]).trasformables["burn"];
+            while (idt.degree > power)
+            {
+                if (br.Count == 0) break;
+                power += Item.GetData(br[0]).burnPw;
+                br.RemoveAt(0);
+            }
+            yield return new WaitForSeconds(idt.time);
+            power -= idt.degree;
+            bb.RemoveAt(0);
+            Drops.Load(idt.trasformed, 1, obj.transform.position);
+        }
+        obj.Animated = sprites[obj.index].Get(bb.Count == 0 && br.Count == 0 ? "void" : "contain", (SpriteManager.Toward)0);
+    }
 
     public void ChangeVision()
     {
         spt.rotation = facing;
-        ObjSprite os = sprites[index];
-        if (os.towardable)
+        SpriteManager sm = sprites[index];
+        
+        if (sm.towardable)
         {
-            Sprite sp = os.Get(ld.angleinit);
-            if(sp != spriteR.sprite)
+            AnimatedSprite sp = sm.Get(ld.curAction, ld.angleinit);
+
+            if (sp != Animated)
             {
-                spriteR.sprite = sp;
+                Animated = sp;
             }
         }
     }
+
     public static void Change(string changedTypeName, ObjData changer)
     {
         int index = oTy.IndexOf(changedTypeName);
@@ -212,13 +282,9 @@ public class Obj : MonoBehaviour
         }
         Add(od);
     }
-    public static void SetSprite(int index, ObjSprite sprite)
+    public static void SetSprite(string typeName, SpriteManager spM)
     {
-        sprites.Insert(index, sprite);
-    }
-    public static void SetSprite(string typeName, ObjSprite sprite)
-    {
-        sprites.Insert(oTy.IndexOf(typeName), sprite);
+        sprites.Insert(oTy.IndexOf(typeName), spM);
     }
     /// <summary>
     /// load a object in the scene
@@ -252,7 +318,6 @@ public class Obj : MonoBehaviour
 
         if (registIn)
         {
-            Vector3 p = ld.relapos.ToVec(cp);
             if (!Ct.world.loadedChunk.ContainsKey(cp))
             {
                 Ct.world.loadedChunk.Add(cp, Ct.world.ChunkManager(cp));
@@ -304,6 +369,61 @@ public class Obj : MonoBehaviour
         }
     }
 
+    public void Animate()
+    {
+        Animating();
+    }
+    private System.Collections.IEnumerator Animating()
+    {
+        int i = 0;
+        float pretime = 0;
+        while (true)
+        {
+            AnimatedSprite.Frame f = asp.frames[i++];
+            float t = f.time - pretime;
+
+            spriteR.sprite = f.sprite;
+            yield return new WaitForSeconds(t);
+
+            if (i == asp.frames.Count)
+            {
+                i = 0;
+                pretime = 0;
+            }
+        }
+    }
+    private AnimatedSprite asp;
+
+    public AnimatedSprite Animated
+    {
+        get => asp;
+        set
+        {
+            asp = value;
+            if (value == null)
+            {
+                if (animCor != null)
+                {
+                    Ct.ct.Cta(animCor);
+                    animCor = null;
+                }
+            }
+            else
+            {
+                if (animCor != null)
+                {
+                    Ct.ct.Cta(animCor);
+                    animCor = null;
+                }
+                if (value.animated)
+                    animCor = Ct.ct.CT(Animating());
+                else
+                    spriteR.sprite = value.Get().sprite;
+            }
+        }
+    }
+    private Coroutine animCor;
+
     public delegate void Interaction(ObjData data, Obj obj);
 
     private void OnDestroy()
@@ -331,10 +451,15 @@ public class ObjData
     public Drop[] drops;
     public Growable growable;
     public Container container;
+    public Interacter[] interacters;
     public string itc;
 
     public string[] initstates;
 
+    public object spriteobj
+    {
+        get => spritePath == null ? name + ".png" : spritePath;
+    }
     [Serializable]
     public class Collider
     {
@@ -402,6 +527,14 @@ public class ObjData
     {
         public int cell = 16;
     }
+    /// <summary>
+    /// can use when the itc change sprite of obj
+    /// </summary>
+    public class Interacter
+    {
+        public string interact;
+        public string action;
+    }
     public void GetDrops(Vector3 position)
     {
         if (drops == null)
@@ -441,6 +574,7 @@ public class ObjLoadData
 
     public V3 rotation = new();
     public float angleinit;
+    public string curAction = SpriteManager.single;
 
     public bool calcutated = true;
 }
@@ -500,7 +634,7 @@ public class ObjSprite
         string p = Mod.modPath + from + "/";
         if (paths is string)
         {
-            sprites.Add(Mod.LoadSprite(p += paths,pivot, ppu));
+            sprites.Add(Mod.LoadSprite(p += paths, pivot, ppu));
         }
         else
         {
@@ -527,7 +661,7 @@ public class ObjSprite
     }
     public Sprite Get(int index)
     {
-        if(index >= sprites.Count)
+        if (index >= sprites.Count)
             return null;
         return sprites[index];
     }
@@ -554,4 +688,230 @@ public class ObjSprite
 
     public ObjSprite(object paths, string from) => Load(paths, from, new(), SMath.Spr.pxPerUnit);
     public ObjSprite(ObjData data, string modName) => Load(data, modName);
+}
+
+public class SpriteManager
+{
+    public Dictionary<string, List<AnimatedSprite>> managed = new();
+    public bool towardable = false;
+    public bool singleAnimation = true;
+    public string initAnimation = single;
+    public static string single = "single";
+
+    public AnimatedSprite Get(string action, Toward toward)
+    {
+        if (!managed.ContainsKey(action))
+            return null;
+        return managed[action][(int)toward];
+    }
+    public AnimatedSprite Get(string action, float initAngle) => Get(action, GetToward(initAngle));
+    public static Toward GetToward(float init)
+    {
+        float relaa = SMath.AngleStandardization(init - Ct.curWd.camAngle + 45);
+        return (Toward)((int)relaa / 90);
+    }
+    /// <summary>
+    /// Get sprite of first action of fiest time
+    /// </summary>
+    /// <returns></returns>
+    public Sprite Get() => managed[initAnimation][0].Get(0);
+    public class SpriteData
+    {
+        public bool standard = true;
+        public bool towardable = false;
+        public object content;
+
+        public string folder = "sprites/";
+        public string form = ".png";
+        public string initAnimation = single;
+
+        public Vector2 pivot = defPivot;
+        public PivotSet pivotSet = PivotSet.fixedPivot;
+        public static Vector2 defPivot = new(114514, 1919180);
+
+        public SpriteManager Load()
+        {
+            SpriteManager sm = new()
+            {
+                initAnimation = initAnimation,
+                towardable = towardable
+            };
+            string path = Mod.modPath + Mod.curLoadModName + "/" + folder;
+
+            if (standard)
+            {
+                if (content is not string)//return if the 'content' is not a string
+                    return sm;
+
+                foreach (string full in Directory
+                    .GetFiles(path)
+                    .Where(file =>
+                    {
+                        string fileName = Path.GetFileName(file);
+                        return fileName.StartsWith(content as string) && !fileName.EndsWith(".meta", StringComparison.OrdinalIgnoreCase);
+                    })
+                    .ToList())
+                {
+                    Sprite sp = LoadSprite(full);
+                    string[] x = Path.GetFileName(full).TrimEnd(form).Split(',');// format: "spriteName,actionName,time,toward.png"
+
+
+                    string actName = x[1] == "" ? single : x[1];
+                    float time = x[2] == "" ? 0 : float.Parse(x[2]);
+                    int toward = x[3] == "" ? 0 : int.Parse(x[3]);
+
+                    if (!sm.managed.ContainsKey(actName))
+                        sm.managed.Add(actName, Enumerable.Range(0, 4)
+                               .Select(_ => new AnimatedSprite())
+                               .ToList());
+                    sm.managed[actName][toward].Load(sp, time);
+                }
+            }
+            else
+            {
+                if (content is string)
+                {
+                    Sprite sp = LoadSprite(path + content);
+                    sm.managed.Add(single, new()
+                    {
+                        new()
+                        {
+                            frames = new()
+                            {
+                                new(sp,0)
+                            }
+                        }
+                    });
+                }
+            }
+
+            return sm;
+        }
+        public Sprite LoadSprite(string path)
+        {
+            Vector2 piv;
+            switch (pivotSet)
+            {
+                case PivotSet.normal:
+                    piv = new(0.5f, 0.5f);
+                    break;
+                case PivotSet.adaptForAnySprite:
+                    Sprite sp = Mod.LoadSprite(path);
+                    sp = Sprite.Create(sp.texture, sp.rect, GetPivot(sp), SMath.Spr.pxPerUnit);
+                    return sp;
+                case PivotSet.fixedPivot:
+                    if (pivot == defPivot)
+                    {
+                        Sprite spr = Mod.LoadSprite(path);
+                        pivot = GetPivot(spr);
+                        return Sprite.Create(spr.texture, spr.rect, pivot, SMath.Spr.pxPerUnit);
+                    }
+                    piv = pivot;
+                    break;
+                default:
+                    return null;
+            }
+            return Mod.LoadSprite(path, piv);
+        }
+
+
+        public enum PivotSet
+        {
+            normal,
+            adaptForAnySprite,
+            fixedPivot//use the pivot variable
+        }
+    }
+    /// <summary>
+    /// Basic Load, let the pivot in center of sprite
+    /// </summary>
+    /// <param name="data"></param>
+    /// <returns></returns>
+    public static SpriteManager Load(object data)
+    {
+        SpriteManager sm = new();
+
+        if (data is string)
+        {
+            string d = data as string;
+            SpriteData sd = new();
+            sd.content = d;
+
+            if (d.Contains('.'))
+                sd.standard = false;
+            sm = sd.Load();
+        }
+        else
+        {
+            JObject jo = data as JObject;
+            SpriteData sd = JsonConvert.DeserializeObject<SpriteData>(jo.ToString());
+            sm = sd.Load();
+        }
+
+        return sm;
+    }
+
+    public static Sprite RevisePivot(Sprite sp)
+    {
+        return Sprite.Create(sp.texture, sp.rect, GetPivot(sp), SMath.Spr.pxPerUnit);
+    }
+    /// <summary>
+    /// do not get the true piivot, but cna be calculate 
+    /// </summary>
+    /// <param name="sp"></param>
+    /// <returns></returns>
+    public static Vector2 GetPivot(Sprite sp)
+    {
+        Rect r = SMath.Spr.GetValidPixels(sp);
+        return new Vector2(r.x + r.width * 0.5f, r.y) / SMath.Spr.pxPerUnit;
+    }
+    public enum Toward
+    {
+        right,
+        up,
+        left,
+        down
+    }
+}
+public class AnimatedSprite
+{
+    public List<Frame> frames;
+    public bool animated = false;
+    public void Load(Sprite sp, float time)
+    {
+        frames ??= new();
+        if (frames.Count == 1)
+            animated = true;
+
+        Frame f = new(sp, time);
+        int index = frames.FindIndex(obj => time < obj.time);
+        if (index == -1)
+            frames.Add(f);
+        else
+            frames.Insert(index, f);
+    }
+    public Sprite Get(int index)
+    {
+        if (frames.Count < index)
+            return null;
+        return frames[index].sprite;
+    }
+    public Sprite Get(float time) => Get(frames.FindIndex(obj => time < obj.time));
+    /// <summary>
+    /// return frame of index 0
+    /// </summary>
+    /// <returns></returns>
+    public Frame Get() => frames[0];
+    public class Frame
+    {
+        public Sprite sprite;
+        public float time;
+
+        public Frame(Sprite sp, float time)
+        {
+            sprite = sp;
+            this.time = time;
+        }
+    }
+
 }

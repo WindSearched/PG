@@ -113,5 +113,16 @@
                 "generatePossibility": 0.3
             }
         ]
+    },
+    {
+        "name": "sandstone_desert",
+        "objects":[{
+                "type": "sandstone",
+                "generatePossibility": 0.7
+            },{
+                "type": "tree",
+                "generatePossibility": 0.0001
+            }
+        ]
     }
 ]

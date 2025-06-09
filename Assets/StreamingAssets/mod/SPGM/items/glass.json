@@ -1,0 +1,25 @@
+{
+    "insertMode": 0,
+    "spritePath": "glass.png",
+    "data": {
+        "name":"glass"
+    },
+    "nameOfLangue": [
+        {
+            "langue":"en",
+            "text": "glass"
+        },{
+            "langue":"zh-cn",
+            "text": "玻璃"
+        }
+    ],
+    "description":[
+        {
+            "langue":"en",
+            "text": "it is trasparent and hard, but it is very crisp"
+        },{
+            "langue":"zh-cn",
+            "text": "它透明且坚硬，但它很脆"
+        }
+    ]
+}

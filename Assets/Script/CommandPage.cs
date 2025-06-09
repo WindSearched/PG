@@ -18,12 +18,14 @@ public class CommandPage : MonoBehaviour
                 return;
             Vector3 p = tree.Count >= 2 ? SMath.V3.Parse(tree[1]) : Ct.ppw;
             Entity.Load(tree[0], p);
+            NoteManager.Load($"summon at {p} the {tree[0]}");
         });
         commands.Add("load", (List<string> tree) =>
         {//[0]name/index, [1] position
             string n = int.TryParse(tree[0], out int ind) ? Obj.oTy[ind] : tree[0];
             Vector3 p = tree.Count >= 2 ? SMath.V3.Parse(tree[1]) : Ct.ppw;
             Obj.Load(n, p);
+            NoteManager.Load($"load at {p} the {n}");
         });
         commands.Add("give", (List<string> tree) =>
         {//0entity, 1item, 2amount
@@ -41,7 +43,13 @@ public class CommandPage : MonoBehaviour
                 inv.Add(item, amt, out int full);
                 if (full > 0)
                     Drops.Load(item, amt, Ct.ppw);
+                NoteManager.Load($"give at {n} {amt} {item}");
             }
+        });
+        commands.Add("text",(List<string> tree) =>//0.key, 1.langue
+        {
+            string text = TextManager.Read(tree[1], tree[0]);
+            Debug.Log(text);
         });
 
         Ct.act.Main.enter.performed += c =>
@@ -59,6 +67,8 @@ public class CommandPage : MonoBehaviour
         {
             List<string> list = command.Split(' ').ToList();
             string c = list[0];
+            if (!commands.ContainsKey(c))
+                return;
             list.RemoveAt(0);
             commands[c]?.Invoke(list);
         }

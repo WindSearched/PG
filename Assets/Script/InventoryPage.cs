@@ -15,7 +15,7 @@ public class InventoryPage : MonoBehaviour
     public Transform craftlist;
     public List<string> list = new();
     public static bool crafting = false;
-    private void Start()
+    public void SStart()
     {
         for (int i = 0; i < gridsParent.childCount; i++)
         {
@@ -101,5 +101,18 @@ public class InventoryPage : MonoBehaviour
         Ct.curWd.inventory.Switch(index, Ct.mouseSelected.select, out Inventory.Grid g);
         Ct.mouseSelected.select = g;
         Ct.mouseSelected.WhenSwitch();
+    }
+
+
+    public void Pointed(GameObject obj)
+    {
+        ItemData data = Item.GetData(Ct.curWd.inventory.GetGrid(int.Parse(obj.name)).item);
+        Ct.ct.PointedName = TextManager.Read(true, true, data.name);
+        Ct.ct.PointedDescription = TextManager.Read(true, false, data.name);
+    }
+    public void APointed()
+    {
+        Ct.ct.PointedName = "";
+        Ct.ct.PointedDescription = "";
     }
 }
