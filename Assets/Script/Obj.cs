@@ -370,10 +370,6 @@ public class Obj : MonoBehaviour
         }
     }
 
-    public void Animate()
-    {
-        Animating();
-    }
     private System.Collections.IEnumerator Animating()
     {
         int i = 0;

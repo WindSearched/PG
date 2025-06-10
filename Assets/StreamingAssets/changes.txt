@@ -12,6 +12,7 @@ obj的碰撞体不再随着相机朝向
 添加load（obj）(name,position)和give(entity,item,amount)指令
 添加可为item添加描述的和各语言名称的功能,可以从json里编写，或者mod文件夹里的texts.json
 优化破坏代码，可以连续破坏了
+为交互设置了距离限制
 
 en:
 Player movement changed from characterController.Move to rigidbody.veloocity, the player's y value will not be offset

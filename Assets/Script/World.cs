@@ -27,7 +27,6 @@ public class World : MonoBehaviour
     public void PlayerMoving()
     {
         Vector2Int cp = Ct.cp;
-        Ct.ppw = Ct.ct.player.transform.position;
         Ct.pp = WorldGenerator.ToPlanPos(Ct.ppw);
         Ct.cp = WorldGenerator.ToChunkOfPos(Ct.pp);
 
@@ -573,6 +572,7 @@ public class WorldData
     /// </summary>
     public float approacherDistance = 6;
     public float dropsApporachSpeed = 500;
+    public float maxDistanceOfInteraction = 5;
     /// <summary>
     /// minimum dianstance of playe to absorb drops
     /// </summary>

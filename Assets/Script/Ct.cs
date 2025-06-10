@@ -66,6 +66,10 @@ public class Ct : MonoBehaviour
     public static Vector2 pp;
     public static Vector3 ppw;
     /// <summary>
+    /// distance from plater pos and world mouse pos
+    /// </summary>
+    public static float dmp;
+    /// <summary>
     /// the player loaction's chunk pos
     /// </summary>
     public static Vector2Int cp;
@@ -196,8 +200,7 @@ public class Ct : MonoBehaviour
     {
         mP = act.Main.mousePos.ReadValue<Vector2>();
 
-        RayCast();
-        RayPos();
+
         MouseOcped();
         toward = MouseToward();
 
@@ -205,6 +208,13 @@ public class Ct : MonoBehaviour
         evn.IWhenVisionRotating();
         evn.IWhenVisionElevate();
         evn.IWhenUpdate();
+    }
+    private void FixedUpdate()
+    {
+        RayCast();
+        RayPos();
+        ppw = transform.position;
+        dmp = (ray.transform.position - ppw).magnitude;
     }
     private void Awake()
     {

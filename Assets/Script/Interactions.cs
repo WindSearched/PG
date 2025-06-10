@@ -1,5 +1,4 @@
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Interactions;
@@ -22,9 +21,6 @@ public class Interactions : MonoBehaviour
         Ct.act.itc.leftM.canceled += c => left = State.relase;
     }
 
-
-
-
     public void MouseInt(InputAction.CallbackContext cxt, bool left)
     {
         if (Ct.ct.specifyInter || !Page.IsPage("main"))
@@ -33,6 +29,8 @@ public class Interactions : MonoBehaviour
         ItemData d = Item.GetData(Ct.mouseSelected.select.item);
         if (cxt.interaction is TapInteraction)
         {
+            if (Ct.curWd.maxDistanceOfInteraction < Ct.dmp)
+                return;
             if (left)
             {
                 this.left = State.tap;
@@ -64,13 +62,20 @@ public class Interactions : MonoBehaviour
             if (left)
             {
                 this.left = State.hold;
-                Item.Interact(Item.InteractionType.leftpress, d);
+                if (Ct.curWd.maxDistanceOfInteraction < Ct.dmp)
+                {
+                    Item.Interact(Item.InteractionType.leftpress, d);
+                }
                 breakCor = Ct.ct.CT(Breaking());
             }
             else
             {
-                right = State.hold;
-                Item.Interact(Item.InteractionType.rightpress, d);
+                if(Ct.curWd.maxDistanceOfInteraction < Ct.dmp)
+                {
+
+                    right = State.hold;
+                    Item.Interact(Item.InteractionType.rightpress, d);
+                }
             }
         }
     }
@@ -92,34 +97,38 @@ public class Interactions : MonoBehaviour
 
         while (left != State.relase)
         {
-            if (o == Ct.ct.ray && o!= null && o.CompareTag("Object"))
-            {
-                float remMar = mar / d.breaking.hardness * Time.deltaTime;
-                curMar += remMar;
-
-                m.SetFloat("_lineWidth", curMar);
-                if (curMar >= 10)
-                {
-                    Obj.GetData(o.GetComponent<Obj>().ld.name).GetDrops(o.transform.position);
-                    Destroy(o);
-                    yield return new WaitForEndOfFrame();
-                    o = null;
-                    continue;
-                }
-            }
-            else
-            {
-                o = Ct.ct.ray;
-                if (o != null && o.CompareTag("Object"))
-                {
-                    d = Obj.data[o.GetComponent<Obj>().index];
-                    m = o.GetComponentInChildren<SpriteRenderer>().material;
-                    curMar = 0.5f;
-                }
-            }
             yield return null;
+            if (Ct.curWd.maxDistanceOfInteraction >= Ct.dmp)
+            {
+                if (o == Ct.ct.ray && o != null && o.CompareTag("Object"))
+                {
+                    float remMar = mar / d.breaking.hardness * Time.deltaTime;
+                    curMar += remMar;
+                    Debug.Log(curMar);
+                    m.SetFloat("_lineWidth", curMar);
+                    if (curMar >= 10)
+                    {
+                        Obj.GetData(o.GetComponent<Obj>().ld.name).GetDrops(o.transform.position);
+                        Destroy(o);
+                        yield return new WaitForEndOfFrame();
+                        o = null;
+                        continue;
+                    }
+                }
+                else
+                {
+                    o = Ct.ct.ray;
+                    if (o != null && o.CompareTag("Object"))
+                    {
+                        d = Obj.data[o.GetComponent<Obj>().index];
+                        m = o.GetComponentInChildren<SpriteRenderer>().material;
+                        curMar = 0.5f;
+                    }
+                }
+                yield return null;
+            }
         }
-        if(o != null && o.CompareTag("Object"))
+        if (o != null && o.CompareTag("Object"))
         {
             m.SetFloat("_lineWidth", 0.5f);
         }
