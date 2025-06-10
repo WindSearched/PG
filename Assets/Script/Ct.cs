@@ -499,6 +499,7 @@ public static class SMath
         => math.pow(x, p);
     public static float Abs(float v)
         => Mathf.Abs(v);
+    public static int Abs(int v) => Mathf.Abs(v);
 
     public static float degRad = Mathf.Deg2Rad;
 

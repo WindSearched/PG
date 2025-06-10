@@ -21,9 +21,6 @@ public class InventoryPage : MonoBehaviour
         {
             grids.Add(gridsParent.GetChild(i).gameObject);
         }
-        Ct.AddScalable(gridsParent.GetComponent<RectTransform>());
-        Ct.AddScalable(transform.Find("crafted").GetComponent<RectTransform>());
-
 
         Ct.curWd.inventory.WhenInvChange += WhenUpdate;
         Ct.curWd.inventory.Invchange();

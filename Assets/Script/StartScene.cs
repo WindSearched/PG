@@ -157,12 +157,16 @@ public class StartScene : MonoBehaviour
     }
     public void ModButton()
     {
-        float by = -30;
         actived = modPage;
         modPage.SetActive(!modPage.activeInHierarchy);
 
+        UpdateModList();
+    }
+    public void UpdateModList()
+    {
+        float by = -100;
         int i = 0;
-        while(i < modPageParent.childCount)
+        while (i < modPageParent.childCount)
         {
             Destroy(modPageParent.GetChild(i).gameObject);
             i++;
@@ -178,7 +182,7 @@ public class StartScene : MonoBehaviour
         {
             GameObject o = Instantiate(bar, modPageParent);
             RectTransform rt = o.GetComponent<RectTransform>();
-            rt.localPosition = new(50, i * 100 + by);
+            rt.localPosition = new(50, i * by);
 
             o.transform.Find("icon").GetComponent<Image>().sprite = Mod.LoadSprite(dis[i].FullName + "/icon.png");
             o.transform.Find("name").GetComponent<TextMeshProUGUI>().text = dis[i].Name;
@@ -201,6 +205,7 @@ public class StartScene : MonoBehaviour
             Data.CopyAll(path[0], p);
             NoteManager.Load($"load mod {di.Name}");
         }
+        UpdateModList();
     }
     public void ChangesButton()
     {
@@ -225,6 +230,7 @@ public class StartScene : MonoBehaviour
     {
         string n = o.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text;
         set.preWorld = n;
+        set.Save();
         SceneManager.LoadScene("main");
     }
     public void UpdateWorldList()

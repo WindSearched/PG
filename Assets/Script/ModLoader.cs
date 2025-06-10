@@ -70,16 +70,16 @@ public static class Mod
         }
         public void AddTexts()
         {
-            if(nameOfLangue != null)
+            if (nameOfLangue != null)
             {
                 string key = "itname_" + data.name;
-                foreach(var v in nameOfLangue)
+                foreach (var v in nameOfLangue)
                 {
                     v.key = key;
                     v.AddTo();
                 }
             }
-            if(description != null)
+            if (description != null)
             {
                 string key = "itdescrp_" + data.name;
                 foreach (var v in description)
@@ -144,8 +144,8 @@ public static class Mod
         {
             if (name != null)
             {
-                string key = "obname_"+ data.name ;
-                foreach(var v in name)
+                string key = "obname_" + data.name;
+                foreach (var v in name)
                 {
                     v.key = key;
                     v.AddTo();
@@ -153,7 +153,7 @@ public static class Mod
             }
             if (description != null)
             {
-                string key = "obdescrp_"+ data.name;
+                string key = "obdescrp_" + data.name;
                 foreach (var v in description)
                 {
                     v.key = key;
@@ -234,7 +234,7 @@ public static class Mod
         return LoadSprite(path, new Vector2(0.5f, 0.5f));
     }
     public static Sprite LoadSprite(string modName, MItem data)
-    { 
+    {
         string s = data.spritePath == null ? data.data.name + ".png" : data.spritePath;
         string p = modPath + modName + "/sprites/" + s;
         try
@@ -263,28 +263,33 @@ public static class Mod
             curLoadModName = Path.GetFileName(p);
 
             string pp = p + "/objects/";
-            foreach (string ppp in Directory.GetFiles(pp))
-            {
-                if (ppp.Contains(".m"))
-                    continue;
-                Data.ReadJson<Object>(ppp).AddTo(curLoadModName);
-            }
+            if (Data.DIrectioryExists(pp))
+                foreach (string ppp in Directory.GetFiles(pp))
+                {
+                    if (ppp.Contains(".m"))
+                        continue;
+                    Data.ReadJson<Object>(ppp).AddTo(curLoadModName);
+                }
 
             pp = p + "/items/";
-            foreach (string ppp in Directory.GetFiles(pp))
-            {
-                if (ppp.Contains(".m"))
-                    continue;
-                MItem d = Data.ReadJson<MItem>(ppp);
-                d.AddTo(curLoadModName);
-                d.AddTexts();
-            }
+            if (Data.DIrectioryExists(pp))
+                foreach (string ppp in Directory.GetFiles(pp))
+                {
+                    if (ppp.Contains(".m"))
+                        continue;
+                    MItem d = Data.ReadJson<MItem>(ppp);
+                    d.AddTo(curLoadModName);
+                    d.AddTexts();
+                }
 
             WorldGenerator.LoadingFromPath(p + "/biomes.json");
             TextManager.AddTextFromFile(p + "/texts.txt");
 
             LoadDLL(p + "/" + curLoadModName + ".dll");
-            Crafting.Load(Data.ReadJson<Recipe[]>(p + "/recipes.json"));
+
+            pp = p + "/recipes.json";
+            if (Data.FileExists(pp))
+            Crafting.Load(Data.ReadJson<Recipe[]>(pp));
 
         }
     }

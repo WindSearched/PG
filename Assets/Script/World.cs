@@ -169,6 +169,8 @@ public static class WorldGenerator
     
     public static void LoadingFromPath(string path)
     {
+        if (!Data.FileExists(path))
+            return;
         BiomeData[] bd = Data.ReadJson<BiomeData[]>(path);
         foreach(BiomeData v in bd)
         {
@@ -591,12 +593,13 @@ public class WorldData
     public int GetSeed(int index)
     {
         index %= seed.Length;
+        index = SMath.Abs(index);
         return seed[index] / 3 + seed[index];
     }
 
     public int GetSeed(Vector2Int p)
     {
-        int s = seed[p.x % seed.Length] + seed[p.y % seed.Length];
+        int s = seed[SMath.Abs(p.x % seed.Length)] + seed[SMath.Abs(p.y % seed.Length)];
         return s * p.y * p.x + 2 + p.x;
     }
     public void Save()
