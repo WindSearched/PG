@@ -29,7 +29,6 @@ public static class GrowingSystem
             if (!Ct.world.loadedChunk.ContainsKey(cp))
                 continue;
 
-            //string type = Entity.entityTypes[SMath.Random(Entity.entityTypes.Count, 0)];
             Chunk ch = Ct.world.loadedChunk[cp];
             string type = WorldGenerator.biomes[WorldGenerator.GetBiome(ch.BiomeType(ch.GetRandomPosition()))].GetEntity(SMath.RandomInt());
             Summon(Ct.world.loadedChunk[cp].GetRandomPosition(), type);

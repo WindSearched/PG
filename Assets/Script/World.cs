@@ -20,6 +20,7 @@ public class World : MonoBehaviour
             Data.Create(WorldGenerator.chunksPath);
 
         Ct.ct.CT(GrowingSystem.Growing());
+        Ct.ct.CT(GrowingSystem.Summoning());
 
         Ct.command.CommandByPath(Data.worldPath + Ct.set.preWorld + "/preload.txt");
     }

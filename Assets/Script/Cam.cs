@@ -43,10 +43,6 @@ public class Cam : MonoBehaviour
         cen = ply.transform.position;
 
         CamPosition();
-
-        Ct.ct.CT(GrowingSystem.Growing());
-        Ct.ct.CT(GrowingSystem.Summoning());
-
         //develop part
         //
 

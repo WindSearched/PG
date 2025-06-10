@@ -797,7 +797,7 @@ public class SpriteManager
                     sp = Sprite.Create(sp.texture, sp.rect, GetPivot(sp), SMath.Spr.pxPerUnit);
                     return sp;
                 case PivotSet.fixedPivot:
-                    if (pivot == defPivot)
+                    if (pivot == defPivot)//if pivot not set, calculate the pivot
                     {
                         Sprite spr = Mod.LoadSprite(path);
                         pivot = GetPivot(spr);
@@ -859,8 +859,14 @@ public class SpriteManager
     /// <returns></returns>
     public static Vector2 GetPivot(Sprite sp)
     {
-        Rect r = SMath.Spr.GetValidPixels(sp);
-        return new Vector2(r.x + r.width * 0.5f, r.y) / SMath.Spr.pxPerUnit;
+        Rect valid = SMath.Spr.GetValidPixels(sp);
+        Rect full = sp.rect;
+
+        // 计算归一化 pivot 坐标：相对整个 sprite 的尺寸 (0-1)
+        float pivotX = (valid.x + valid.width * 0.5f) / full.width;
+        float pivotY = (valid.y) / full.height;
+
+        return new Vector2(pivotX, pivotY);
     }
     public enum Toward
     {
