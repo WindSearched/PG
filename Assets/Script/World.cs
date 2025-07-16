@@ -1,7 +1,6 @@
+using MessagePack;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Text;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -15,7 +14,7 @@ public class World : MonoBehaviour
     private void Start()
     {
         Ct.world = this;
-        Ct.evn.WhenPlayerMoving += PlayerMoving;
+        Ct.ct.CT(WorldGenerating());
         if (!Data.DIrectioryExists(WorldGenerator.chunksPath))
             Data.Create(WorldGenerator.chunksPath);
 
@@ -25,40 +24,54 @@ public class World : MonoBehaviour
         Ct.command.CommandByPath(Data.worldPath + Ct.set.preWorld + "/preload.txt");
     }
 
-    public void PlayerMoving()
+    public System.Collections.IEnumerator WorldGenerating()
     {
-        Vector2Int cp = Ct.cp;
-        Ct.pp = WorldGenerator.ToPlanPos(Ct.ppw);
-        Ct.cp = WorldGenerator.ToChunkOfPos(Ct.pp);
-
-        if (cp == precp)
-            return;
-
-        Dictionary<Vector2Int, Chunk> renderedChunk = new();
-        for (int i = -Ct.curWd.radius_renderChunk; i < Ct.curWd.radius_renderChunk; i++)
+        while(true)
         {
-            for (int j = -Ct.curWd.radius_renderChunk; j < Ct.curWd.radius_renderChunk; j++)
+            Vector2Int cp = Ct.cp;
+            Ct.pp = WorldGenerator.ToPlanPos(Ct.ppw);
+            Ct.cp = WorldGenerator.ToChunkOfPos(Ct.pp);
+
+            if (cp == precp)
+                yield return null;
+
+            Dictionary<Vector2Int, Chunk> renderedChunk = new();
+            for (int i = -Ct.curWd.radius_renderChunk; i < Ct.curWd.radius_renderChunk; i++)
             {
-                Vector2Int rp = new(i, j);
-                if (rp.magnitude <= Ct.curWd.radius_renderChunk)
+                for (int j = -Ct.curWd.radius_renderChunk; j < Ct.curWd.radius_renderChunk; j++)
                 {
-                    Vector2Int ocp = cp + rp;
-                    renderedChunk.Add(ocp, ChunkManager(ocp));
+                    Vector2Int rp = new(i, j);
+                    if (rp.magnitude <= Ct.curWd.radius_renderChunk)
+                    {
+                        Vector2Int ocp = cp + rp;
+                        yield return Ct.ct.CT(ChunkManager(ocp));
+                        renderedChunk.Add(ocp, managingChunk);
+                        yield return null;
+                    }
                 }
             }
+            yield return Ct.ct.CT(WorldGenerator.Comparing(renderedChunk));
+
+            loadedChunk = renderedChunk;
+
+            precp = cp;
         }
-        WorldGenerator.Comparing(renderedChunk);
-
-        loadedChunk = renderedChunk;
-
-        precp = cp;
     }
-    public Chunk ChunkManager(Vector2Int cp)
+    public Chunk managingChunk;
+    public System.Collections.IEnumerator ChunkManager(Vector2Int cp)
     {
-        if (loadedChunk.ContainsKey(cp)) return loadedChunk[cp];
+
         string path = WorldGenerator.chunksPath + WorldGenerator.ToPath(cp) + ".bin";
-        if (Data.FileExists(path)) return Data.ReadBinary<Chunk>(path);
-        else return WorldGenerator.Generating(new(cp));
+        if (loadedChunk.ContainsKey(cp))
+            managingChunk = loadedChunk[cp];
+        else if (Data.FileExists(path))
+            managingChunk = Data.ReadBinary<Chunk>(path);
+        else
+        {
+            WorldGenerator.generetingChunk = new(cp);
+            yield return Ct.ct.CT(WorldGenerator.Generating());
+            managingChunk = WorldGenerator.generetingChunk;
+        }
     }
     public void Saving()
     {
@@ -72,28 +85,31 @@ public static class WorldGenerator
 {
     public static List<string> biomeNames = new();
     public static Dictionary<string, BiomeData> biomes = new();
+    public static int units_of_chunk = Ct.curWd.units_of_chunk;
     public static int units_of_biome = Ct.curWd.units_of_biome;
     public static int half_of_chunk = units_of_chunk / 2;
-    public static int units_of_chunk = Ct.curWd.units_of_chunk;
     public static int chunk_per_biome = units_of_biome / units_of_chunk;
     public static List<Generator> generators = new();
 
     public static string chunksPath = Data.worldPath + Ct.curWd.name + "/chunks/";
 
     public static Dictionary<Vector2Int, List<GameObject>> objInChunk = new();
+    public static Dictionary<Vector2Int, List<GameObject>> actorInChunk = new();
 
-    public static Chunk Generating(Chunk ch)
+    public static Chunk generetingChunk;
+    public static System.Collections.IEnumerator Generating()
     {
 
         if (generators != null)
             foreach (Generator g in generators)
             {
-                ch = g.Invoke(ch);
+                generetingChunk = g.Invoke(generetingChunk);
+                yield return null;
             }
-        return ch;
     }
-    private static void Rendering(Chunk ch, Vector2Int cp)
+    private static System.Collections.IEnumerator Rendering(Chunk ch, Vector2Int cp)
     {
+        int max = Ct.curWd.objRenderedInAFrame;
         int i = 0;
         foreach (Chunk.ObjState os in ch.objs)
         {
@@ -103,16 +119,42 @@ public static class WorldGenerator
                 continue;
             objInChunk[cp].Add(Obj.Load(os, cp));
 
-            i++;
+            if(i++ > max)
+            {
+                yield return null;
+                i = 0;
+            }
         }
     }
+    private static System.Collections.IEnumerator ActRendering(Chunk ch, Vector2Int cp)
+    {
+        int max = Ct.curWd.objRenderedInAFrame;
+        int i = 0;
+        foreach (ActorState os in ch.actors)
+        {
+            if(!actorInChunk.ContainsKey(cp))
+                actorInChunk.Add(cp, new());
+            if (os.name == "n")
+                continue;
+            actorInChunk[cp].Add(Actor.Load(os,false));
+
+            if(i++ > max)
+            {
+                yield return null;
+                i = 0;
+            }
+        }
+    }
+
     /// <summary>
     /// compare the ex-rendered chunks and current chunks
     /// </summary>
     /// <param name="chunks"></param>
-    public static void Comparing(Dictionary<Vector2Int, Chunk> chunks)
+    public static System.Collections.IEnumerator Comparing(Dictionary<Vector2Int, Chunk> chunks)
     {
         HashSet<Vector2Int> removed = new();
+        HashSet<Vector2Int> actremoved = new();
+
         foreach (Vector2Int p in objInChunk.Keys)
         {
             if (!chunks.ContainsKey(p))
@@ -124,19 +166,39 @@ public static class WorldGenerator
                 removed.Add(p);
             }
         }
+        foreach(Vector2Int p in actorInChunk.Keys)
+        {
+            if (!chunks.ContainsKey(p))
+            {
+                Data.WriteBinary(Ct.world.loadedChunk[p], chunksPath + ToPath(p) + ".bin");
+
+                foreach (GameObject g in actorInChunk[p])
+                    UnityEngine.Object.Destroy(g);
+                actremoved.Add(p);
+            }
+        }
         foreach (Vector2Int p in removed)
         {
             objInChunk.Remove(p);
+        }
+        foreach (Vector2Int p in actremoved)
+        {
+            actorInChunk.Remove(p);
         }
         foreach (Vector2Int p in chunks.Keys)
         {
             if (!objInChunk.ContainsKey(p))
             {
                 objInChunk.Add(p, new());
-                //Ct.ct.CT(Rendering(chunks[p], p));
-                Rendering(chunks[p], p);
+                yield return Ct.ct.CT(Rendering(chunks[p], p));
+            }
+            if (!actorInChunk.ContainsKey(p))
+            {
+                yield return Ct.ct.CT(ActRendering(chunks[p], p));
             }
         }
+        
+        yield return null;
     }
     public static bool ExisistChunkFile(Vector2Int cp)
     {
@@ -189,11 +251,11 @@ public static class WorldGenerator
         /// 0-1
         /// </summary>
         public float deafultSuccessGeneratePossibility = 1;
-        public Obj[] objects;
-        public Obj[] entities;
+        public List<Obj> objects = new();
+        public List<Obj> entities = new();
         public string GetObj(int seed)
         {
-                Obj o = objects[SMath.Random(seed, objects.Length, 0)];
+                Obj o = objects[SMath.Random(seed, objects.Count, 0)];
                 float p = SMath.Random(1, 0f);
                 if (o.generatePossibility > p)
                 {
@@ -204,7 +266,10 @@ public static class WorldGenerator
         }
         public string GetEntity(int seed)
         {
-            Obj o = entities[SMath.Random(seed, entities.Length-1, 0)];
+            if (entities.Count == 0)
+                return null;
+
+            Obj o = entities[SMath.Random(seed, entities.Count-1, 0)];
             float p = SMath.Random(1, 0f);
 
             if (o.generatePossibility > p)
@@ -274,12 +339,16 @@ public static class WorldGenerator
     }
 }
 [Serializable]
+[MessagePackObject]
 public class Chunk
 {
-    public int chunkx, chunky;
-    public List<ObjState> objs = new();
-    public List<EntityState> entities = new();
+    [Key(0)] public int chunkx;
+    [Key(1)] public int chunky;
+    [Key(2)] public List<ObjState> objs = new();
+    [Key(3)] public List<EntityState> entities = new();
+    [Key(4)] public List<ActorState> actors = new();
 
+    [IgnoreMember]
     public int Biome
     {
         get => GetBiome(GetBiomePosition());
@@ -291,11 +360,11 @@ public class Chunk
         chunkx = p.x;
         chunky = p.y;
     }
-    [Serializable]
+    [Serializable][MessagePackObject]
     public class ObjState
     {
-        public Dictionary<string, object> states = new();
-        public ObjLoadData ld;
+        [Key(0)] public Dictionary<string, object> states = new();
+        [Key(1)] public ObjLoadData ld;
 
         public Vector3 GetPosition(Vector2Int ch)
         {
@@ -325,13 +394,17 @@ public class Chunk
                 states.Add(name, val);
             }
         }
+
+        public ObjState() { }
     }
     [Serializable]
+    [MessagePackObject]
     public class EntityState
     {
         float x, y, z;
-        public Dictionary<string,object> states;
-        public string name;
+        [Key(0)] public Dictionary<string,object> states;
+        [Key(1)] public string name;
+        public EntityState() { }
 
         public Vector3 GetPosition()
         {
@@ -428,6 +501,11 @@ public class Chunk
     public Vector2 GetRandomPosition()
     {
         return GetRandomPosition(SMath.Random(int.MaxValue, int.MinValue));
+    }
+    public Vector2 GetPositionInChunk()
+    {
+        Vector2 pos = GetRandomPosition();
+        return GetCP() * WorldGenerator.units_of_chunk + pos;
     }
     /// <summary>
     /// biome type int the chunk
@@ -561,13 +639,17 @@ public class WorldData
     /// </summary>
     public float summmonTime = 3;
     public int radius_renderChunk = 3;
-    public float growingTime = 8;
+    public float growingTime = 32;
+    /// <summary>
+    /// number of obj to render per frame, if it rendering
+    /// </summary>
+    public int objRenderedInAFrame = 16;
 
     public float camAngle = 0f;
     public float camYp = 0.22f, camDist = 3, camDeafDist = 4, camElevatepower = 2;
     public Vector3 CamPos = new();
     public Vector3 plyPos = new();
-    public float playerSpeed = 8;
+    public float playerSpeed = 4;
 
     public Inventory inventory;
     /// <summary>

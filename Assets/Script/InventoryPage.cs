@@ -1,10 +1,8 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using static Inventory;
 
 public class InventoryPage : MonoBehaviour
 {
@@ -15,6 +13,8 @@ public class InventoryPage : MonoBehaviour
     public Transform craftlist;
     public List<string> list = new();
     public static bool crafting = false;
+    public bool craft = false;
+    public GameObject ao;
     public void SStart()
     {
         for (int i = 0; i < gridsParent.childCount; i++)
@@ -25,11 +25,50 @@ public class InventoryPage : MonoBehaviour
         Ct.curWd.inventory.WhenInvChange += WhenUpdate;
         Ct.curWd.inventory.Invchange();
 
+        Ct.act.Main.tab.performed += c =>
+        {
+            string inv = "inventory";
+
+            if (Page.IsPage(inv))
+            {
+                Craft();
+            }
+            else
+            {
+                if(Page.IsPage("main") && Ct.mouseSelected.select.item != "n")
+                {
+                    Ct.curWd.inventory.Add(Ct.mouseSelected.select,out int full);
+                    Ct.mouseSelected.Remove();
+                    if (full == 0)
+                        Ct.mouseSelected.select = new();
+                    else
+                        Page.ChangePage(inv);
+                }
+                else
+                    Page.ChangePage(inv);
+            }
+        };
+        Ct.act.Main.shift.started += c =>
+        {
+            Mode(true);
+        };
+        Ct.act.Main.shift.canceled += c =>
+        {
+            Mode(false);
+        };
     }
     public void Binding()
     {
         string inv = "inventory";
-        Page.Add(inv, () => gameObject.SetActive(true), () => gameObject.SetActive(false));
+        Page.Add(inv, () =>
+        {
+            gameObject.SetActive(true);
+            Ct.ct.joystick.gameObject.SetActive(false);
+        }, () =>
+        {
+            gameObject.SetActive(false);
+            Ct.ct.joystick.gameObject.SetActive(true);
+        });
         gameObject.SetActive(false);
     }
     public void WhenUpdate(Inventory inv)
@@ -39,21 +78,40 @@ public class InventoryPage : MonoBehaviour
             Inventory.Grid g = Ct.curWd.inventory.GetGrid(i);
             grids[i].transform.GetChild(0).GetComponent<Image>().sprite = Item.GetSprite(g.item);
             grids[i].GetComponentInChildren<TextMeshProUGUI>().text = g.amt.ToString();
-            if(i < fastInvs.childCount)
+
+            var id = Item.GetData(g?.item).tool;
+            var im = grids[i].transform.GetChild(2).GetComponent<Image>();
+            float fill = 0;
+            if (id != null)
+                fill = (float)g.durab / id.durability;
+            im.fillAmount = fill;
+            if (i < fastInvs.childCount)
             {
                 fastInvs.GetChild(i).GetChild(0).GetComponent<Image>().sprite = Item.GetSprite(g.item);
                 fastInvs.GetChild(i).GetChild(1).GetComponent<TextMeshProUGUI>().text = g.amt.ToString();
+                fastInvs.GetChild(i).GetChild(2).GetComponent<Image>().fillAmount = fill;
             }
         }
     }
+    /// <summary>
+    /// chest only
+    /// </summary>
+    /// <param name="inv"></param>
     public static void OnUpdate(Inventory inv)
     {
-        for(int i = 0; i < Ct.ct.chestView.childCount; i++)
+        for (int i = 0; i < Ct.ct.chestView.childCount; i++)
         {
             Transform grid = Ct.ct.chestView.GetChild(i);
             Inventory.Grid g = inv.GetGrid(i);
             grid.GetChild(0).GetComponent<Image>().sprite = Item.GetSprite(g.item);
             grid.GetChild(1).GetComponent<TextMeshProUGUI>().text = g.amt.ToString();
+
+            var id = Item.GetData(g.item).tool;
+            var im = grid.GetChild(2).GetComponent<Image>();
+            if (id != null)
+                im .fillAmount = g.durab / id.durability;
+            else
+                im .fillAmount = 0;
         }
     }
     /// <summary>
@@ -65,7 +123,7 @@ public class InventoryPage : MonoBehaviour
         int index = int.Parse(o.name);
         string item = Ct.curWd.inventory.GetGrid(index).item;
 
-        if (Ct.shiftPressing)
+        if (craft)
         {
             if (!Item.IsTool(item))
             {
@@ -115,4 +173,29 @@ public class InventoryPage : MonoBehaviour
         Ct.ct.PointedName = "";
         Ct.ct.PointedDescription = "";
     }
+
+    public void Mode(bool isCraft)
+    {
+        craft = isCraft;
+        if (craft)
+            ao.GetComponentInChildren<TextMeshProUGUI>().text = "in";
+        else
+            ao.GetComponentInChildren<TextMeshProUGUI>().text = "out";
+    }
+    public void Craft()
+    {
+        if (list.Count == 0)
+            Page.ChangePage("main");
+        else
+        {
+            Crafting.Craft(list, out bool craft);
+            if (craft)
+                Debug.Log("[InventotyPage]Crafting completed");
+            for (int i = 0; i < craftlist.childCount; i++)
+                Destroy(craftlist.GetChild(i).gameObject);
+            list.Clear();
+        }
+    }
+    public void Mode() => Mode(!craft);
+
 }

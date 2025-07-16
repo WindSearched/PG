@@ -20,6 +20,15 @@ public class CommandPage : MonoBehaviour
             Entity.Load(tree[0], p);
             NoteManager.Load($"summon at {p} the {tree[0]}");
         });
+        commands.Add("actor_summon", (List<string> tree) =>//val => type position(0,0,0)
+        {
+            //[0]type, [1]position
+            if (!Actor.aTy.Contains(tree[0]))
+                return;
+            Vector3 p = tree.Count >= 2 ? SMath.V3.Parse(tree[1]) : Ct.ppw;
+            Actor.Load(tree[0], p);
+            NoteManager.Load($"summon at {p}, the {tree[0]}");
+        });
         commands.Add("load", (List<string> tree) =>
         {//[0]name/index, [1] position
             string n = int.TryParse(tree[0], out int ind) ? Obj.oTy[ind] : tree[0];

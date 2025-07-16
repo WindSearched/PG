@@ -1,11 +1,18 @@
+using ICSharpCode.SharpZipLib.Core;
+using ICSharpCode.SharpZipLib.Zip;
+using IPGModAPI;
+using MessagePack;
+using MessagePack.Resolvers;
+using MessagePack.Unity;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading.Tasks;
 using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
@@ -17,23 +24,24 @@ public class Ct : MonoBehaviour
 {
     public GameObject player;
     public GameObject cameraO;
-    /// <summary>
-    /// is object under the cutsor, if placing become triggered
-    /// </summary>
-    public GameObject ray;
     public bool inTrigger = false;
-    public GameObject preRay;
     public GameObject inventory;
     public GameObject commandPage;
     public InventoryPage invp;
     public Material nonmal;
     public Material board;
     public static Transform canvas;
+    public static RectTransform canvasrt;
     public Transform objects;
     public Transform destroyedObjects;
     public Transform chestView;
     public TextMeshProUGUI pointedName;
     public TextMeshProUGUI pointedDescription;
+    public VirtualJoystick joystick;
+    public VirtualJoystick indicatorstick;
+    public Indicator indicator;
+    public List<Sprite> indicates;
+    public Dictionary<string, Sprite> sprites;
     public string PointedName
     {
         set
@@ -95,8 +103,7 @@ public class Ct : MonoBehaviour
 
     public static List<RectTransform> scalableui = new();
     public static List<Vector2> realPositions = new();
-    public static bool shiftPressing;
-    public static bool attackingMode = false;   
+    public static bool attackingMode = false;
     public static float scale;
     public static MouseSelect mouseSelected;
     public static LineRenderer attackViewer;
@@ -105,6 +112,9 @@ public class Ct : MonoBehaviour
     /// </summary>
     public static PreloadObj po;
     public static FadeUIManager fadeUIManager;
+    public static MainCanvs mcanvas;
+    public static bool visionElevate = false, visionRotate = false;
+    public static bool quit = false;
     private void Start()
     {
         act.Main.leftM.performed +=
@@ -123,39 +133,11 @@ public class Ct : MonoBehaviour
             c => left = MouseState.relased;
         act.Main.rightM.canceled +=
             c => right = MouseState.relased;
-        act.Main.tab.performed += c =>
-        {
-            string inv = "inventory";
-            inventory = inventory != null ? inventory : GameObject.Find("Canvas/inventoryPage");
 
-            if (Page.IsPage(inv))
-            {
-                if (invp.list.Count == 0)
-                    Page.ChangePage("main");
-                else
-                {
-                    Crafting.Craft(invp.list, out bool craft);
-                    if (craft)
-                        Debug.Log("[InventotyPage]Crafting completed");
-                    for (int i = 0; i < invp.craftlist.childCount; i++)
-                        Destroy(invp.craftlist.GetChild(i).gameObject);
-                    invp.list.Clear();
-                }
-            }
-            else
-                Page.ChangePage(inv);
-        };
-        act.Main.shift.started += c =>
-        {
-            shiftPressing = true;
-        };
-        act.Main.shift.canceled += c =>
-        {
-            shiftPressing = false;
-        };
+
         act.Main.CommandPage.performed += c =>
         {
-            if(commandPage.activeInHierarchy)
+            if (commandPage.activeInHierarchy)
                 Page.ChangePage("main");
             else
                 Page.ChangePage("command");
@@ -174,6 +156,7 @@ public class Ct : MonoBehaviour
 
         cam = cameraO.GetComponent<Cam>();
         canvas = GameObject.Find("Canvas").transform;
+        canvasrt = canvas.GetComponent<RectTransform>();
         inventory.GetComponent<InventoryPage>().Binding();
         attackViewer = player.GetComponent<LineRenderer>();
         commandPage.GetComponent<CommandPage>().Starte();
@@ -181,20 +164,62 @@ public class Ct : MonoBehaviour
         GetScale(canvas.GetComponent<RectTransform>().sizeDelta);
 
         Page.Add("main", () => { }, () => { });
-        Page.Add("command", () => { commandPage.SetActive(true); }, () => { commandPage.SetActive(false); });  
+        Page.Add("command", () => { commandPage.SetActive(true); }, () => { commandPage.SetActive(false); });
         Page.curPage = "main";
 
         Mod.LoadMods();
         Item.InctInitializzation();
         Obj.LoadDefualtInteractions();
+        Actor.InitActions();
 
         evn.BeforeGameSave += () => { curWd.plyPos = player.transform.position; };
 
         invp.SStart();
         NoteManager.Init(canvas.Find("notes"));
+
+#if UNITY_ANDROID
+        joystick.gameObject.SetActive(true);
+        indicatorstick.gameObject.SetActive(true);
+#endif
+
+        OnCastIn += () =>
+        {
+            casted.GetComponentInChildren<SpriteRenderer>().material = board;
+            casted.GetComponentInChildren<SpriteRenderer>().material.SetFloat("_lineWidth", 0.5f);
+
+            indicator.Indicate = "breakable";
+        };
+        OnCastOut += () =>
+        {
+            precasted.GetComponentInChildren<SpriteRenderer>().material = nonmal;
+
+            indicator.Indicate = "";
+        };
+
+        indicatorstick.OnInputing += () =>
+        {
+            indicator.rt.anchoredPosition += Time.deltaTime * set.indicatorJoystickVelocity * indicatorstick.InputVector;
+
+
+            // 限制在 Canvas 范围内
+            Vector2 clampedPos = indicator.rt.anchoredPosition;
+            clampedPos.x = Mathf.Clamp(clampedPos.x, -canvasrt.rect.width / 2, canvasrt.rect.width / 2);
+            clampedPos.y = Mathf.Clamp(clampedPos.y, -canvasrt.rect.height / 2, canvasrt.rect.height / 2);
+            indicator.rt.anchoredPosition = clampedPos;
+
+            foreach (var button in ButtonMouseHandler.MouseHandlers)
+            {
+                button.CheckPointer(indicator.rt.position);
+            }
+        };
         //
         //finish preload
-        //
+        ///
+        MessagePackSerializer.DefaultOptions = MessagePackSerializerOptions.Standard
+       .WithResolver(CompositeResolver.Create(
+        UnityResolver.Instance,
+        StandardResolver.Instance
+        ));
     }
     private void Update()
     {
@@ -204,9 +229,8 @@ public class Ct : MonoBehaviour
         MouseOcped();
         toward = MouseToward();
 
-
-        evn.IWhenVisionRotating();
-        evn.IWhenVisionElevate();
+        if (visionRotate) evn.IWhenVisionRotating();
+        if (visionElevate) evn.IWhenVisionElevate();
         evn.IWhenUpdate();
     }
     private void FixedUpdate()
@@ -214,7 +238,8 @@ public class Ct : MonoBehaviour
         RayCast();
         RayPos();
         ppw = transform.position;
-        dmp = (ray.transform.position - ppw).magnitude;
+        if (casted != null)
+            dmp = (casted.transform.position - ppw).magnitude;
     }
     private void Awake()
     {
@@ -232,6 +257,7 @@ public class Ct : MonoBehaviour
     }
     private void OnApplicationQuit()
     {
+        quit = true;
         if (set.quitSave)
         {
             evn.IBeforeGameSave();
@@ -248,42 +274,57 @@ public class Ct : MonoBehaviour
 
             if (child.TryGetComponent<RectTransform>(out var rectTransform))
             {
-                rectTransform.SetParent(ct.destroyedObjects, false); 
+                rectTransform.SetParent(ct.destroyedObjects, false);
             }
             else
             {
-                child.SetParent(ct.destroyedObjects); 
+                child.SetParent(ct.destroyedObjects);
             }
 
             Destroy(child.gameObject);
         }
     }
-    public GameObject RayCast()
+    public void RayCast()
     {
         if (inTrigger)
-            return this.ray;
+            return;
 
-        Ray ray = Camera.main.ScreenPointToRay(mP);
-        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, ~0, QueryTriggerInteraction.Ignore) && hit.collider.gameObject != this.ray)
+        Ray ray = Camera.main.ScreenPointToRay(indicator.position);
+        precasted = casted;
+
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, ~0, QueryTriggerInteraction.Ignore))
         {
-            preRay = this.ray;
-            this.ray = hit.collider.gameObject;
-
-            if (preRay == null)
-                return null;
-            if (this.ray.CompareTag("Plane"))
-                preRay.GetComponentInChildren<SpriteRenderer>().material = nonmal;
-            else
-            {
-                if (!preRay.CompareTag("Plane"))
-                    preRay.GetComponentInChildren<SpriteRenderer>().material = nonmal;
-                this.ray.GetComponentInChildren<SpriteRenderer>().material = board;
-                this.ray.GetComponentInChildren<SpriteRenderer>().material.SetFloat("_lineWidth", 0.5f);
-            }
-            return this.ray;
+            casted = hit.collider.gameObject;
         }
-        return null;
+        else
+        {
+            casted = null;
+        }
+
+        if (precasted != casted)
+        {
+            // 射线进入一个新的非Plane物体
+            if (casted != null && !casted.CompareTag("Plane"))
+            {
+                cast = true;
+                OnCastIn?.Invoke();
+            }
+            // 射线离开非Plane物体()
+            if (precasted != null && !precasted.CompareTag("Plane"))
+            {
+                OnCastOut?.Invoke();
+                cast = false;
+            }
+        }
+
     }
+
+    /// <summary>
+    /// is object under the cutsor, if placing become triggered
+    /// </summary>
+    public GameObject casted, precasted;
+    public event dPGM OnCastIn, OnCastOut;
+    public bool cast;
     public void RayPos()
     {
         Ray ray = Camera.main.ScreenPointToRay(mP);
@@ -374,7 +415,8 @@ public class Ct : MonoBehaviour
     }
     public void Cta(Coroutine cr)
     {
-        StopCoroutine(cr);
+        if (cr != null)
+            StopCoroutine(cr);
     }
     public static void GetScale(Vector2 size)
     {
@@ -416,7 +458,7 @@ public class Ct : MonoBehaviour
     {
         try
         {
-            return Obj.GetData(ct.ray.GetComponent<Obj>().ld.name);
+            return Obj.GetData(ct.casted.GetComponent<Obj>().ld.name);
         }
         catch
         {
@@ -461,7 +503,7 @@ public class CEvent
     }
     public void IWhenPlayerMoving()
     {
-       WhenPlayerMoving?.Invoke();
+        WhenPlayerMoving?.Invoke();
     }
     public void IInMouseMoving() => InMouseMoving?.Invoke();
 }
@@ -548,6 +590,12 @@ public static class SMath
     {
         return (int)math.floor(var);
     }
+    /// <summary>
+    /// get vec2 from angle
+    /// </summary>
+    /// <param name="angle"></param>
+    /// <returns></returns>
+    public static Vector2 GetVector(float angle) => new(CosA(angle), SinA(angle));
     public static class V3
     {
         /// <summary>
@@ -567,6 +615,12 @@ public static class SMath
         }
         public static Vector3 GetVector(float x = 0, float y = 0, float z = 0)
             => new(x, y, z);
+        /// <summary>
+        /// get a plan position
+        /// </summary>
+        /// <param name="vec"></param>
+        /// <returns></returns>
+        public static Vector3 GetVector(Vector2 vec, float height = 0) => new(vec.x, height, vec.y);
         public static Vector3 Parse(string p)
         {
             try
@@ -580,6 +634,14 @@ public static class SMath
             {
                 return Vector3.zero;
             }
+        }
+
+        public static Vector3 DirectionAdjustment(Vector3 dir, float angle)
+        {
+            float b = Angle(dir);
+            float r = b - 90 + angle;
+
+            return GetVector(SMath.GetVector(r)) * dir.magnitude;
         }
     }
     public static class V2
@@ -595,7 +657,23 @@ public static class SMath
         }
         public static Vector2Int Random(Vector2Int max, Vector2Int min)
         {
-            return new(SMath.Random(max.x,min.x), SMath.Random(max.y,min.y));
+            return new(SMath.Random(max.x, min.x), SMath.Random(max.y, min.y));
+        }
+        public static Vector2 Random(float max, float min)
+        {
+            return new(SMath.Random(max, min), SMath.Random(max, min));
+        }
+        public static Vector2 RandomByDirection(float dirangle, float angleArea)
+        {
+            float a = angleArea / 2;
+            float b = SMath.Random(a, -a);
+            float c = dirangle + b;
+            return GetVector(c);
+        }
+        public static Vector2 RandomByDirection(Vector2 dir, float dirangle)
+        {
+            float a = Angle(dir);
+            return RandomByDirection(a, dirangle);
         }
     }
     public static class Spr
@@ -714,6 +792,11 @@ public class Setting
     /// color of preloadobj when the item cannot placed
     /// </summary>
     public Color objCannotPlace = new(1, 0, 0, 0.2f);
+    public float indicatorJoystickVelocity = 160;
+    /// <summary>
+    /// max distance to do not move
+    /// </summary>
+    public float indicatorJoystickDistance = 0.4f;
     public void Save()
     {
         Data.WriteJson(this, Data.setting);
@@ -731,14 +814,27 @@ public class Setting
 public static class Data
 {
     /// <summary>
-    /// this is the setting dataa path
+    /// thisis the worlds data path
     /// </summary>
-    public static string setting = Application.streamingAssetsPath + "/setting.json";
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR
     /// <summary>
     /// thisis the worlds data path
     /// </summary>
     public static string worldPath = Application.streamingAssetsPath + "/world/";
-
+    /// <summary>
+    /// this is the setting dataa path
+    /// </summary>
+    public static string setting = Application.streamingAssetsPath + "/setting.json";
+#else
+    /// <summary>
+    /// thisis the worlds data path
+    /// </summary>
+    public static string worldPath = Application.persistentDataPath + "/world/";
+    /// <summary>
+    /// this is the setting dataa path
+    /// </summary>
+    public static string setting = Application.persistentDataPath + "/setting.json";
+#endif
     public static void WriteJson<T>(T data, string path, Formatting formatting = Formatting.Indented)
     {
 
@@ -838,21 +934,38 @@ public static class Data
 
         return Convert.ChangeType(value, targetType);
     }
+    //BinaryFormatter formatter = new();
+    //using FileStream stream = new(path, FileMode.Create);
+    //formatter.Serialize(stream, data);
     public static void WriteBinary<T>(T data, string path)
     {
-        BinaryFormatter formatter = new();
-        using FileStream stream = new(path, FileMode.Create);
-        formatter.Serialize(stream, data);
+        var options = MessagePackSerializerOptions.Standard.WithResolver(
+            CompositeResolver.Create(
+                TypelessObjectResolver.Instance,
+                UnityResolver.Instance,
+                StandardResolver.Instance
+            )
+        );
+        byte[] bytes = MessagePackSerializer.Serialize(data,options);
+        File.WriteAllBytes(path, bytes);
     }
     public static T ReadBinary<T>(string path)
     {
-
         if (!FileExists(path))
             return default;
+        var options = MessagePackSerializerOptions.Standard.WithResolver(
+            CompositeResolver.Create(
+                TypelessObjectResolver.Instance, 
+                UnityResolver.Instance,
+                StandardResolver.Instance
+            )
+        );
+        //BinaryFormatter formatter = new();
+        //using FileStream stream = new(path, FileMode.Open);
+        //return (T)formatter.Deserialize(stream);
 
-        BinaryFormatter formatter = new();
-        using FileStream stream = new(path, FileMode.Open);
-        return (T)formatter.Deserialize(stream);
+        byte[] bytes = File.ReadAllBytes(path);
+        return MessagePackSerializer.Deserialize<T>(bytes, options);
     }
     public static string ReadTextFile(string filePath)
     {
@@ -923,17 +1036,17 @@ public static class Data
     {
         if (!DIrectioryExists(source))
             return;
-        if(!DIrectioryExists(dest))
+        if (!DIrectioryExists(dest))
             Create(dest);
 
         DirectoryInfo di = new(source);
 
-        foreach(FileInfo fi in di.GetFiles())
+        foreach (FileInfo fi in di.GetFiles())
         {
-            fi.CopyTo(dest + "/" + fi.Name,true);
+            fi.CopyTo(dest + "/" + fi.Name, true);
         }
-        
-        foreach(DirectoryInfo d in di.GetDirectories())
+
+        foreach (DirectoryInfo d in di.GetDirectories())
         {
             CopyAll(d.FullName, dest + "/" + d.Name);
         }
@@ -946,6 +1059,115 @@ public static class Data
         else if (FileExists(path))
             File.Delete(path);
     }
+    /// <summary>
+    /// unzip a zip file
+    /// </summary>
+    /// <param name="to">path of unziped files</param>
+    public static void Uncompression(string from, string to)
+    {
+        if (!File.Exists(from))
+        {
+            Debug.LogError("ZIP 文件不存在！");
+            return;
+        }
+
+        FileStream fs = File.OpenRead(from);
+        ZipFile zipFile = new(fs);
+
+        foreach (ZipEntry entry in zipFile)
+        {
+            if (!entry.IsFile)
+                continue; // 跳过文件夹
+
+            string entryFileName = entry.Name;
+
+            // 清理非法路径
+            string fullPath = Path.Combine(to, entryFileName);
+
+            // 替换所有反斜杠，保证在 Android 上正确
+            fullPath = fullPath.Replace("\\", "/");
+
+            string directoryName = Path.GetDirectoryName(fullPath);
+
+            // 安全路径检查
+            if (string.IsNullOrEmpty(directoryName))
+            {
+                Debug.LogWarning("路径为空，跳过: " + entryFileName);
+            }
+            else
+            {
+                try
+                {
+                    if (!Directory.Exists(directoryName))
+                        Directory.CreateDirectory(directoryName);
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogError($"创建目录失败: {directoryName}, 错误: {ex.Message}");
+                    NoteManager.Load("error");
+                }
+            }
+
+            byte[] buffer = new byte[4096]; // 4KB 缓冲区
+
+            using (Stream zipStream = zipFile.GetInputStream(entry))
+            using (FileStream streamWriter = File.Create(fullPath))
+            {
+                StreamUtils.Copy(zipStream, streamWriter, buffer);
+            }
+        }
+
+        zipFile.Close();
+        fs.Close();
+    }
+    public static async void UncompressionFromApk(string path, string to)
+    {
+        await CopyFile(path);
+        Uncompression(Application.persistentDataPath + "/" + path, Application.persistentDataPath);
+    }
+    /// <summary>
+    /// copy file in streamingassetspath to pesdentdatapath
+    /// </summary>
+    /// <param name="path"></param>
+    public static async Task CopyFile(string path)
+    {
+        string sourcePath = Path.Combine(Application.streamingAssetsPath, path);
+        string targetPath = Path.Combine(Application.persistentDataPath, path);
+
+        byte[] fileData = await LoadFileAsync(sourcePath);
+
+        if (fileData != null)
+        {
+            File.WriteAllBytes(targetPath, fileData);
+            Debug.Log($"文件已复制到: {targetPath}");
+        }
+        else
+        {
+            Debug.LogError("文件读取失败，无法复制。");
+        }
+    }
+
+    private static async Task<byte[]> LoadFileAsync(string path)
+    {
+        using (UnityWebRequest request = UnityWebRequest.Get(path))
+        {
+            var operation = request.SendWebRequest();
+
+            while (!operation.isDone)
+                await Task.Yield();
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                return request.downloadHandler.data; // 返回二进制数据
+            }
+            else
+            {
+                Debug.LogError($"读取失败: {request.error}");
+                return null;
+            }
+        }
+    }
+
 }
 public delegate void SMethod();
 
@@ -958,7 +1180,7 @@ public static class TextManager
 
     public static void AddLangue(string language)
     {
-        if(!ExistLangue(language))
+        if (!ExistLangue(language))
         {
             languages.Add(language);
             manager.Add(language, new());
@@ -975,9 +1197,9 @@ public static class TextManager
         }
     }
     public static bool ExistLangue(string language) => languages.Contains(language);
-    public static void AddText(string langue,string key, string text, bool addLangue = true)
+    public static void AddText(string langue, string key, string text, bool addLangue = true)
     {
-        if(!ExistLangue(langue))
+        if (!ExistLangue(langue))
         {
             if (addLangue)
                 AddLangue(langue);
@@ -988,11 +1210,11 @@ public static class TextManager
     }
     public static void AddTextFromFile(string path)
     {
-        if(!Data.FileExists(path))
+        if (!Data.FileExists(path))
             return;
         string langue = null, prex = "", key = "", val = "";
 
-        foreach(var line in File.ReadAllLines(path))
+        foreach (var line in File.ReadAllLines(path))
         {
             string[] pt = line.Split('/');
             if (pt.Length != 2)
@@ -1000,7 +1222,7 @@ public static class TextManager
             if (line[0] == '#')
             {
                 string p = pt[0].TrimStart('#');
-                switch(p)
+                switch (p)
                 {
                     case "l":
                         langue = pt[1];
@@ -1012,7 +1234,7 @@ public static class TextManager
             }
             else
             {
-                if(langue == null)
+                if (langue == null)
                     continue;
                 key = pt[0];
                 val = pt[1];
@@ -1022,8 +1244,8 @@ public static class TextManager
         }
     }
     /*
-    #l/zh-cn
-    #p/itname
+# l/zh-cn
+# p/itname
     glass/玻璃
      */
     public static string Read(string langue, string key)
@@ -1031,7 +1253,7 @@ public static class TextManager
         if (ExistLangue(langue))
         {
             var dic = manager[langue];
-            if(dic.ContainsKey(key))
+            if (dic.ContainsKey(key))
             {
                 return dic[key];
             }
@@ -1057,7 +1279,7 @@ public static class TextManager
     /// </summary>
     /// <param name="key"></param>
     /// <returns></returns>
-    public static string Read(string key) =>  Read(curLangue, key);
+    public static string Read(string key) => Read(curLangue, key);
 
     public class Text
     {

@@ -390,6 +390,54 @@ public partial class @Ac: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""virtualSticks"",
+            ""id"": ""e9279c90-d476-4c1c-aa03-ab3c2c302683"",
+            ""actions"": [
+                {
+                    ""name"": ""move"",
+                    ""type"": ""Button"",
+                    ""id"": ""19eb0186-d142-4214-8d94-36d10d61f533"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""sel"",
+                    ""type"": ""Button"",
+                    ""id"": ""af1fd101-2334-476f-984e-9a1681a64ec5"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""bbb4c783-363b-4fd4-b2cc-56a52a90bf2a"",
+                    ""path"": """",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""move"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ef4c8619-c285-48c8-9e85-774d2833803f"",
+                    ""path"": """",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""sel"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -415,6 +463,10 @@ public partial class @Ac: IInputActionCollection2, IDisposable
         // start
         m_start = asset.FindActionMap("start", throwIfNotFound: true);
         m_start_esc = m_start.FindAction("esc", throwIfNotFound: true);
+        // virtualSticks
+        m_virtualSticks = asset.FindActionMap("virtualSticks", throwIfNotFound: true);
+        m_virtualSticks_move = m_virtualSticks.FindAction("move", throwIfNotFound: true);
+        m_virtualSticks_sel = m_virtualSticks.FindAction("sel", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -706,6 +758,60 @@ public partial class @Ac: IInputActionCollection2, IDisposable
         }
     }
     public StartActions @start => new StartActions(this);
+
+    // virtualSticks
+    private readonly InputActionMap m_virtualSticks;
+    private List<IVirtualSticksActions> m_VirtualSticksActionsCallbackInterfaces = new List<IVirtualSticksActions>();
+    private readonly InputAction m_virtualSticks_move;
+    private readonly InputAction m_virtualSticks_sel;
+    public struct VirtualSticksActions
+    {
+        private @Ac m_Wrapper;
+        public VirtualSticksActions(@Ac wrapper) { m_Wrapper = wrapper; }
+        public InputAction @move => m_Wrapper.m_virtualSticks_move;
+        public InputAction @sel => m_Wrapper.m_virtualSticks_sel;
+        public InputActionMap Get() { return m_Wrapper.m_virtualSticks; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(VirtualSticksActions set) { return set.Get(); }
+        public void AddCallbacks(IVirtualSticksActions instance)
+        {
+            if (instance == null || m_Wrapper.m_VirtualSticksActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_VirtualSticksActionsCallbackInterfaces.Add(instance);
+            @move.started += instance.OnMove;
+            @move.performed += instance.OnMove;
+            @move.canceled += instance.OnMove;
+            @sel.started += instance.OnSel;
+            @sel.performed += instance.OnSel;
+            @sel.canceled += instance.OnSel;
+        }
+
+        private void UnregisterCallbacks(IVirtualSticksActions instance)
+        {
+            @move.started -= instance.OnMove;
+            @move.performed -= instance.OnMove;
+            @move.canceled -= instance.OnMove;
+            @sel.started -= instance.OnSel;
+            @sel.performed -= instance.OnSel;
+            @sel.canceled -= instance.OnSel;
+        }
+
+        public void RemoveCallbacks(IVirtualSticksActions instance)
+        {
+            if (m_Wrapper.m_VirtualSticksActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IVirtualSticksActions instance)
+        {
+            foreach (var item in m_Wrapper.m_VirtualSticksActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_VirtualSticksActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public VirtualSticksActions @virtualSticks => new VirtualSticksActions(this);
     public interface IMainActions
     {
         void OnQ(InputAction.CallbackContext context);
@@ -729,5 +835,10 @@ public partial class @Ac: IInputActionCollection2, IDisposable
     public interface IStartActions
     {
         void OnEsc(InputAction.CallbackContext context);
+    }
+    public interface IVirtualSticksActions
+    {
+        void OnMove(InputAction.CallbackContext context);
+        void OnSel(InputAction.CallbackContext context);
     }
 }

@@ -11,15 +11,10 @@ public class MouseSelect : MonoBehaviour
     private void Start()
     {
         select = new();
-        select.item = "n";
         Ct.mouseSelected = this;
 
         rt = GetComponent<RectTransform>();
         Ct.AddScalable(rt);
-    }
-    private void Update()
-    {
-        rt.position = Ct.act.Main.mousePos.ReadValue<Vector2>();
     }
     public void WhenSwitch()
     {
@@ -79,5 +74,11 @@ public class MouseSelect : MonoBehaviour
         select.Add(-removed, out int full);
         if(full != 0 || select.amt <= 0)
             WhenSwitch();
+    }
+
+    public void Remove()
+    {
+        select = new();
+        WhenSwitch();
     }
 }

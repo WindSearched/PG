@@ -71,7 +71,7 @@ public class PreloadObj : Obj
         Placeable = itd.placeable.condition == od.name;
 
         Ct.ct.inTrigger = true;
-        Ct.ct.ray = other.gameObject;
+        Ct.ct.casted = other.gameObject;
     }
     private void OnTriggerExit(Collider other)
     {
@@ -83,7 +83,7 @@ public class PreloadObj : Obj
         Placeable = itd.placeable.condition == null;
 
         Ct.ct.inTrigger = false;
-        Ct.ct.ray = null;
+        Ct.ct.casted = null;
     }
     private void OnDisable()
     {

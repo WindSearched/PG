@@ -1,4 +1,5 @@
 using IPGModAPI;
+using MessagePack;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -147,8 +148,8 @@ public class Item
             s= Ct.GetObjData()?.name;//raycasted
             if (s == data.placeable.condition)
             {
-                Obj.Load(data.placeable.placed, Ct.ct.ray.transform.position);
-                Obj.Destroy(Ct.ct.ray, s);
+                Obj.Load(data.placeable.placed, Ct.ct.casted.transform.position);
+                Obj.Destroy(Ct.ct.casted, s);
             }
         }
     }
@@ -282,13 +283,16 @@ public class ItemData
 }
 
 [Serializable]
+[MessagePackObject]
 public class Inventory
 {
-    public List<Grid> invt = new();
+    [Key(0)]public List<Grid> invt = new();
     public event Update WhenInvChange;
-    public static Transform collection;
+    [Key(1)] public static Transform collection;
 
-    public bool full = false;
+    [Key(2)] public bool full = false;
+
+    public Inventory(){ }
     public Grid GetGrid(int index)
     {
         return invt[index];
@@ -434,20 +438,21 @@ public class Inventory
         }
     }
     [Serializable]
+    [MessagePackObject]
     public class Grid
     {
         /// <summary>
         /// amount
         /// </summary>
-        public int amt;
+        [Key(0)] public int amt;
         /// <summary>
         /// type of item
         /// </summary>
-        public string item = "n";
+        [Key(1)] public string item = "n";
         /// <summary>
         /// durability
         /// </summary>
-        public int durab = -1;
+        [Key(2)] public int durab = -1;
 
         /// <summary>
         /// add in the grid, if it is full return surplus, if the grid is empty return full complete
@@ -516,6 +521,7 @@ public class Inventory
                 durab = grid.durab;
             }
         }
+        public Grid() { }
         public Grid(int amt = 0, string item = "n", int durab = -1)
         {
             this.amt = amt;

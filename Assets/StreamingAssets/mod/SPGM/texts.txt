@@ -6,7 +6,7 @@ stone/stone
 stone/base element
 
 #l/zh-cn
-stone/石头
+stone/基础的材料
 
 #p/itname_
-stone/基础的材料
+stone/石头

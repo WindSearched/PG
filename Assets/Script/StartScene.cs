@@ -1,16 +1,17 @@
 using IPGModAPI;
+using SFB;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
-using System.Windows.Forms;
 using UnityEngine.InputSystem;
-using System.Text;
-using SFB;
+using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 public class StartScene : MonoBehaviour
 {
     public static Dictionary<Type, BuildObj> changeMode = new();
@@ -50,6 +51,7 @@ public class StartScene : MonoBehaviour
         {
             actived.SetActive(!actived.activeInHierarchy);
         };
+
     }
     public void Init()
     {
@@ -232,6 +234,10 @@ public class StartScene : MonoBehaviour
         set.preWorld = n;
         set.Save();
         SceneManager.LoadScene("main");
+
+#if UNITY_ANDROID
+        FirstLoad();
+#endif
     }
     public void UpdateWorldList()
     {
@@ -307,6 +313,19 @@ public class StartScene : MonoBehaviour
     }
     public TMP_InputField inpName;
     public TMP_InputField inpSeed;
+
+    public static async void FirstLoad()
+    {
+        string txt = "changes.txt";
+
+        if (Data.FileExists(txt))
+            return;
+        else
+        {
+            await Data.CopyFile(txt);
+            Data.UncompressionFromApk("mod.zip", "mod");
+        }
+    }
 }
 
 [Serializable]
@@ -363,6 +382,7 @@ public static class AB
         object o = abo[abon].LoadAsset<UnityEngine.Object>(path);
         return o;
     }
+
 }
 public static class PathParse
 {
@@ -425,4 +445,5 @@ public static class DLLpg
         }
         return null;
     }
+
 }

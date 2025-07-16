@@ -56,6 +56,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Analyzer Include="D:\centre\Visual Studio\IDE\Common7\IDE\Extensions\Microsoft\Visual Studio Tools for Unity\Analyzers\Microsoft.Unity.Analyzers.dll" />
+    <Analyzer Include="D:\centre\Unity\Project\PG2\Assets\Packages\MessagePackAnalyzer.3.1.4\analyzers\roslyn4.3\cs\MessagePack.SourceGenerator.dll" />
+    <Analyzer Include="D:\centre\Unity\Project\PG2\Assets\Packages\MessagePackAnalyzer.3.1.4\analyzers\roslyn4.3\cs\MessagePack.Analyzers.CodeFixes.dll" />
     <Analyzer Include="D:\centre\Unity\Editor\2022.3.17f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.SourceGenerators.dll" />
     <Analyzer Include="D:\centre\Unity\Editor\2022.3.17f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
@@ -81,12 +83,14 @@
     <Compile Include="Assets\StandaloneFileBrowser\StandaloneFileBrowser.cs" />
     <Compile Include="Assets\Script\Item.cs" />
     <Compile Include="Assets\StandaloneFileBrowser\IStandaloneFileBrowser.cs" />
+    <Compile Include="Assets\Script\Actor.cs" />
     <Compile Include="Assets\StandaloneFileBrowser\StandaloneFileBrowserLinux.cs" />
     <Compile Include="Assets\Ac.cs" />
     <Compile Include="Assets\Script\StartScene.cs" />
     <Compile Include="Assets\Script\NoteManager.cs" />
     <Compile Include="Assets\Script\other\HighlightLabelUI.cs" />
     <Compile Include="Assets\Script\CommandPage.cs" />
+    <Compile Include="Assets\Script\other\VirtualJoystick.cs" />
     <Compile Include="Assets\Script\Player.cs" />
     <Compile Include="Assets\StandaloneFileBrowser\StandaloneFileBrowserMac.cs" />
     <Compile Include="Assets\Script\GrowingSystem.cs" />
@@ -96,24 +100,38 @@
     <Compile Include="Assets\Script\other\FadeUIManager.cs" />
     <Compile Include="Assets\Script\other\FadeAndRecycleUI.cs" />
     <Compile Include="Assets\StandaloneFileBrowser\StandaloneFileBrowserEditor.cs" />
+    <Compile Include="Assets\Script\Indicator.cs" />
     <Compile Include="Assets\Script\PreloadObj.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Overlay.shader" />
+    <None Include="Assets\Packages\System.Collections.Immutable.8.0.0\useSharedDesignerContext.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap.shader" />
+    <None Include="Assets\Packages\MessagePack.3.1.4\lib\netstandard2.1\MessagePack.dll" />
+    <None Include="Assets\Packages\MessagePack.Annotations.3.1.4\lib\netstandard2.0\MessagePack.Annotations.dll" />
+    <None Include="Assets\Packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro_Mobile.cginc" />
     <None Include="Assets\StreamingAssets\mod\SPGM\changes.txt" />
+    <None Include="Assets\Packages\System.Collections.Immutable.8.0.0\THIRD-PARTY-NOTICES.TXT" />
+    <None Include="Assets\Packages\MessagePackAnalyzer.3.1.4\analyzers\roslyn4.3\cs\MessagePack.Analyzers.CodeFixes.dll" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF SSD.shader" />
+    <None Include="Assets\Packages\Microsoft.NET.StringTools.17.11.4\lib\netstandard2.0\Microsoft.NET.StringTools.dll" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Surface-Mobile.shader" />
     <None Include="Assets\StreamingAssets\mod\SPGM\description.txt" />
     <None Include="Assets\Debug\characters.txt" />
     <None Include="Assets\StreamingAssets\changes.txt" />
+    <None Include="Assets\Packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.xml" />
     <None Include="Assets\Sprite\outline.shader" />
+    <None Include="Assets\Packages\MessagePack.Annotations.3.1.4\lib\netstandard2.0\MessagePack.Annotations.xml" />
+    <None Include="Assets\Packages\System.Collections.Immutable.8.0.0\LICENSE.TXT" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Surface.shader" />
     <None Include="Assets\TextMesh Pro\Sprites\EmojiOne Attribution.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap-Custom-Atlas.shader" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF.shader" />
+    <None Include="Assets\Packages\System.Runtime.CompilerServices.Unsafe.6.0.0\THIRD-PARTY-NOTICES.TXT" />
+    <None Include="Assets\Packages\Microsoft.NET.StringTools.17.11.4\lib\netstandard2.0\Microsoft.NET.StringTools.xml" />
+    <None Include="Assets\Packages\MessagePackAnalyzer.3.1.4\analyzers\roslyn4.3\cs\MessagePack.SourceGenerator.dll" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile SSD.shader" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro_Properties.cginc" />
@@ -121,11 +139,17 @@
     <None Include="Assets\TextMesh Pro\Shaders\TMPro_Surface.cginc" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Following Characters.txt" />
     <None Include="Assets\StandaloneFileBrowser\Plugins\System.Windows.Forms.dll" />
+    <None Include="Assets\Packages\System.Runtime.CompilerServices.Unsafe.6.0.0\useSharedDesignerContext.txt" />
+    <None Include="Assets\Packages\System.Runtime.CompilerServices.Unsafe.6.0.0\LICENSE.TXT" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile Masking.shader" />
+    <None Include="Assets\Packages\MessagePack.3.1.4\lib\netstandard2.1\MessagePack.xml" />
     <None Include="Assets\StandaloneFileBrowser\Plugins\Ookii.Dialogs.dll" />
+    <None Include="Assets\Packages\System.Collections.Immutable.8.0.0\lib\netstandard2.0\System.Collections.Immutable.xml" />
+    <None Include="Assets\Packages\Microsoft.NET.StringTools.17.11.4\notices\THIRDPARTYNOTICES.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF Overlay.shader" />
     <None Include="Assets\StreamingAssets\world\deafault\preload.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap-Mobile.shader" />
+    <None Include="Assets\Packages\System.Collections.Immutable.8.0.0\lib\netstandard2.0\System.Collections.Immutable.dll" />
     <None Include="Assets\TextMesh Pro\Fonts\LiberationSans - OFL.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile.shader" />
     <None Include="Assets\StreamingAssets\mod\SPGM\texts.txt" />
@@ -464,6 +488,10 @@
       <HintPath>D:\centre\Unity\Editor\2022.3.17f1\Editor\Data\Managed\UnityEngine\UnityEditor.UnityConnectModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="ICSharpCode.SharpZipLib">
+      <HintPath>Assets\Plugins\ICSharpCode.SharpZipLib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System.Windows.Forms">
       <HintPath>Assets\Plugins\System.Windows.Forms.dll</HintPath>
       <Private>False</Private>
@@ -476,6 +504,22 @@
       <HintPath>Library\PackageCache\com.unity.collections@1.2.4\Unity.Collections.LowLevel.ILSupport\Unity.Collections.LowLevel.ILSupport.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="MessagePack">
+      <HintPath>Assets\Packages\MessagePack.3.1.4\lib\netstandard2.1\MessagePack.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="MessagePack.Annotations">
+      <HintPath>Assets\Packages\MessagePack.Annotations.3.1.4\lib\netstandard2.0\MessagePack.Annotations.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe">
+      <HintPath>Assets\Packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.NET.StringTools">
+      <HintPath>Assets\Packages\Microsoft.NET.StringTools.17.11.4\lib\netstandard2.0\Microsoft.NET.StringTools.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="IPGModLib">
       <HintPath>Assets\Plugins\IPGModLib.dll</HintPath>
       <Private>False</Private>
@@ -486,6 +530,10 @@
     </Reference>
     <Reference Include="Ookii.Dialogs">
       <HintPath>Assets\StandaloneFileBrowser\Plugins\Ookii.Dialogs.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Collections.Immutable">
+      <HintPath>Assets\Packages\System.Collections.Immutable.8.0.0\lib\netstandard2.0\System.Collections.Immutable.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.Android.Types">
@@ -994,6 +1042,10 @@
     </Reference>
     <Reference Include="PsdPlugin">
       <HintPath>Library\ScriptAssemblies\PsdPlugin.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="MessagePack.Unity">
+      <HintPath>Library\ScriptAssemblies\MessagePack.Unity.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Unity.Burst.Editor">

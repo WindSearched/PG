@@ -1,5 +1,8 @@
+using IPGModAPI;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements.Experimental;
+using static SMath;
 
 public class Player : MonoBehaviour
 {
@@ -15,15 +18,17 @@ public class Player : MonoBehaviour
     private void Start()
     {
         ent = GetComponent<Entity>();
-        Ct.act.Main.direction.performed +=
-            c =>
+        dPGM a = () =>
+        {
+            if (Page.IsPage("main"))
             {
-                if (Page.IsPage("main"))
-                {
-                    ent.speed = Ct.curWd.playerSpeed;
-                    detDIr = true;
-                }
-            };
+                ent.speed = Ct.curWd.playerSpeed;
+                detDIr = true;
+            }
+        };
+
+        Ct.act.Main.direction.performed += c => a.Invoke();
+        Ct.ct.joystick.OnInputIn += a;
 
         transform.position = Ct.curWd.plyPos;
         GetComponent<SphereCollider>().radius = Ct.curWd.approacherDistance;
@@ -31,7 +36,7 @@ public class Player : MonoBehaviour
 
     public void Update()
     {
-        inp = Ct.act.Main.direction.ReadValue<Vector3>();
+        inp = GetDir();
         if (inp == Vector3.zero)
         {
             detDIr = false;
@@ -48,6 +53,14 @@ public class Player : MonoBehaviour
 
         Ct.cam.Following(transform.position);
         plane.transform.position = transform.position;
+    }
+
+    public Vector3 GetDir()
+    {
+        if (Ct.ct.joystick.isInputing)
+            return WorldGenerator.To3DPos(Ct.ct.joystick.InputVector);
+        else
+            return Ct.act.Main.direction.ReadValue<Vector3>().normalized;
     }
     public Coroutine cor;
     public void OnTriggerEnter(Collider other)
@@ -84,6 +97,6 @@ public class Player : MonoBehaviour
         float b = SMath.Angle(inp);
         float r = b - 90 + a;
 
-        return new(SMath.CosA(r), 0, SMath.SinA(r));
+        return new Vector3(SMath.CosA(r), 0, SMath.SinA(r)) * inp.magnitude;
     }
 }

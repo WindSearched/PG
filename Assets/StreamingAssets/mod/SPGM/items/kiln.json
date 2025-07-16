@@ -1,6 +1,6 @@
 {
     "insertMode": 0,
-    "spritePath": "obj/kiln,burn,0,.png",
+    "spritePath": "kiln.png",
     "data": {
         "name":"kiln",
         "placeable": {
