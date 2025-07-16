@@ -80,9 +80,7 @@ public class Obj : MonoBehaviour
             Sprite = sprites[index].Get();
             dt = data[index];
 
-            transform.position = ld.relapos.ToVec(cp);
-            transform.rotation = Quaternion.Euler(ld.rotation.ToVec());
-
+            transform.SetPositionAndRotation(ld.relapos.ToVec(cp), Quaternion.Euler(ld.rotation.ToVec()));
             if (!dt.collision)
             {
                 gameObject.layer = LayerMask.NameToLayer("No-collision Obj");
@@ -123,6 +121,7 @@ public class Obj : MonoBehaviour
 
         Ct.evn.WhenVisionRotating += ChangeVision;
         Ct.evn.WhenVisionElevate += ChangeVision;
+        spt.rotation = facing;
     }
     public static int c = 0;
 
@@ -209,7 +208,7 @@ public class Obj : MonoBehaviour
     }
     public static System.Collections.IEnumerator Burning()
     {
-        Obj obj = Ct.ct.ray.GetComponent<Obj>();
+        Obj obj = Ct.ct.casted.GetComponent<Obj>();
         Chunk.ObjState state = obj.state;
         float power = 0;
         List<string> bb = state.GetState("burnable") as List<string>;
@@ -237,17 +236,10 @@ public class Obj : MonoBehaviour
     {
         spt.rotation = facing;
         SpriteManager sm = sprites[index];
-        
-        if (sm.towardable)
-        {
-            AnimatedSprite sp = sm.Get(ld.curAction, ld.angleinit);
+        sm.ToAnimate(ld.curAction, ld.angleinit, spriteR, ref animCor, ref animDt);
 
-            if (sp != Animated)
-            {
-                Animated = sp;
-            }
-        }
     }
+    public SpriteManager.Compare animDt;
 
     public static void Change(string changedTypeName, ObjData changer)
     {
@@ -312,6 +304,12 @@ public class Obj : MonoBehaviour
     }
     public static GameObject Load(ObjLoadData ld, Vector2Int cp, bool registIn = true)
     {
+        Ct.ct.CT(Loadd(ld, cp, registIn));
+        return loaded;
+    }
+    private static GameObject loaded;
+    private static System.Collections.IEnumerator Loadd(ObjLoadData ld, Vector2Int cp, bool registIn = true)
+    {
         GameObject o = Instantiate((GameObject)Resources.Load("object"));
         Obj ob = o.GetComponent<Obj>();
         ob.cp = cp;
@@ -321,7 +319,8 @@ public class Obj : MonoBehaviour
         {
             if (!Ct.world.loadedChunk.ContainsKey(cp))
             {
-                Ct.world.loadedChunk.Add(cp, Ct.world.ChunkManager(cp));
+                Ct.ct.CT(Ct.world.ChunkManager(cp));
+                Ct.world.loadedChunk.Add(cp, Ct.world.managingChunk);
             }
             Ct.world.loadedChunk[cp].LoadinObj(ld, out int ind);
             ob.state = Ct.world.loadedChunk[cp].objs[ind];
@@ -330,8 +329,10 @@ public class Obj : MonoBehaviour
                 Debug.Log("not same");
         }
 
-        return o;
+        loaded = o;
+        yield return null;
     }
+
     public static GameObject Load(string type, Vector3 position, bool registIn = true)
     {
         ObjLoadData ld = new()
@@ -589,6 +590,10 @@ public class V3
         y = vec.y;
         z = vec.z;
     }
+    public static V3 Get(Vector3 vec)
+    {
+        return new(vec);
+    }
     public V3()
     { }
     public V3(float x, float y, float z)
@@ -701,7 +706,77 @@ public class SpriteManager
             return null;
         return managed[action][(int)toward];
     }
-    public AnimatedSprite Get(string action, float initAngle) => Get(action, GetToward(initAngle));
+    public AnimatedSprite Get(string action, float initAngle, out Compare compare)
+    {
+        compare = new()
+        {
+            actionName = action,
+            toward = GetToward(initAngle)
+        };
+        return Get(action, compare.toward);
+    }
+    public void ToAnimate(string action, float initangle, SpriteRenderer spr, ref Coroutine cor, ref Compare curAnimDt)
+    {
+        AnimatedSprite asp;
+        Compare compare;
+        if (towardable)
+            asp = Get(action, initangle, out compare);
+        else
+        {
+            asp = Get(action, 0);
+            compare = new(action, 0);
+        }
+        ToAnimate(asp, spr, ref cor, compare, ref curAnimDt);
+    }
+    public void ToAnimate(string action, Toward toward, SpriteRenderer spr, ref Coroutine cor, ref Compare curAnimDt)
+    {
+        var asp = Get(action, toward);
+        Compare com = new(action, toward);
+
+        ToAnimate(asp, spr, ref cor, com, ref curAnimDt);
+    }
+    public void ToAnimate(AnimatedSprite asp, SpriteRenderer spr, ref Coroutine cor, Compare compare, ref Compare curAnimDt)
+    {
+        if (compare != curAnimDt)
+        {
+            if (cor != null)
+            {
+                Ct.ct.Cta(cor);
+                cor = null;
+            }
+            if (asp != null)
+            {
+                if (asp.animated)
+                    cor = Ct.ct.CT(Animating(spr, asp));
+                else
+                    spr.sprite = asp.Get().sprite;
+            }
+
+            curAnimDt = compare;
+        }
+    }
+    private static System.Collections.IEnumerator Animating(SpriteRenderer spr, AnimatedSprite asp)
+    {
+        int i = 0;
+        float pretime = 0;
+        while (true)
+        {
+            AnimatedSprite.Frame f = asp.frames[i];
+            float t = f.time - pretime;
+
+            spr.sprite = f.sprite;
+
+            if (++i == asp.frames.Count)
+            {
+                i = 0;
+                pretime = 0;
+            }
+            else
+                pretime = t;
+            yield return new WaitForSeconds(t);
+        }
+    }
+
     public static Toward GetToward(float init)
     {
         float relaa = SMath.AngleStandardization(init - Ct.curWd.camAngle + 45);
@@ -874,6 +949,18 @@ public class SpriteManager
         up,
         left,
         down
+    }
+    public class Compare
+    {
+        public string actionName;
+        public Toward toward;
+
+        public Compare() { }
+        public Compare(string name, Toward toward)
+        {
+            actionName = name;
+            this.toward = toward;
+        }
     }
 }
 public class AnimatedSprite

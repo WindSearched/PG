@@ -1,0 +1,29 @@
+{
+    "spritePath": {
+        "content": "dealer",
+        "folder":"sprites/actor",
+        "initAnimation":"wait"
+    },
+    "data":
+    {
+        "name": "dealer",
+        "actions": [
+            "RandomDirectionMove"
+        ],
+        "controller": "RandomChooseController",
+        "interval": 5,
+        "possibility": 50,
+        "collider":{
+            "type": 0,
+            "size":{
+                "x":0.5, "y": 0.8, "z": 0.5
+            },
+            "center":{
+                "y": 0.4
+            }
+        },
+        "triggerRadius": 4,
+        "livetime": 120,
+        "speed" : 2
+    }
+}

@@ -7,9 +7,16 @@ public static class GrowingSystem
     public static IEnumerator Growing()
     {
         Transform objects = GameObject.Find("Objects").transform;
-        float time = Ct.curWd.growingTime / Ct.world.loadedChunk.Count;
+        float time;
         while (true)
         {
+            if(Ct.world.loadedChunk.Count == 0)
+            {
+                yield return new WaitForSeconds(1);
+                continue;
+            }
+            time = Ct.curWd.growingTime / Ct.world.loadedChunk.Count;
+
             int count = objects.childCount;
             int index = SMath.Random(count, 0);
             if(index != 0)
@@ -23,15 +30,17 @@ public static class GrowingSystem
         int r = Ct.curWd.radius_renderChunk;
         while (true)
         {
-            yield return new WaitForSeconds(Ct.curWd.summmonTime);
-
-            Vector2Int cp = SMath.V2.Random(new(Ct.cp.x + r, Ct.cp.y + r), new(Ct.cp.x - r, Ct.cp.y + r));
+            yield return null;
+            Vector2Int cp = SMath.V2.Random(new Vector2Int(Ct.cp.x + r, Ct.cp.y + r), new Vector2Int(Ct.cp.x - r, Ct.cp.y - r));
             if (!Ct.world.loadedChunk.ContainsKey(cp))
                 continue;
 
             Chunk ch = Ct.world.loadedChunk[cp];
             string type = WorldGenerator.biomes[WorldGenerator.GetBiome(ch.BiomeType(ch.GetRandomPosition()))].GetEntity(SMath.RandomInt());
-            Summon(Ct.world.loadedChunk[cp].GetRandomPosition(), type);
+            if(type != null)
+                Summon(WorldGenerator.To3DPos(Ct.world.loadedChunk[cp].GetPositionInChunk()), type);
+
+            yield return new WaitForSeconds(Ct.curWd.summmonTime);
         }
     }
     public static void Grow(GameObject o)
@@ -41,17 +50,16 @@ public static class GrowingSystem
 
         if (od.growable == null)
             return;
-        
-        if(SMath.Random(100, 0f) <= od.growable.possibility)
+        float p = SMath.Random(100, 0f);
+        if (p <= od.growable.possibility)
         {
             Obj.Load(od.growable.nextPhase, o.transform.position);
             Obj.Destroy(o, od.name);
+            Debug.Log("summon");
         }
     }
-    public static void Summon(Vector3 rp, string type)
+    public static void Summon(Vector3 p, string type)
     {
-        Vector2Int cp = WorldGenerator.ToChunkOfPos(rp);
-
-        Entity.Load(type, Ct.world.loadedChunk[cp].GetRandomPosition());
+        Actor.Load(type, p);
     }
 }

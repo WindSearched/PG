@@ -32,7 +32,6 @@ public class Entity : MonoBehaviour
     }
     protected virtual void Update()
     {
-        transform.rotation = Obj.facing;
         Move();
     }
 

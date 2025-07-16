@@ -81,12 +81,14 @@
     <Compile Include="Assets\StandaloneFileBrowser\StandaloneFileBrowser.cs" />
     <Compile Include="Assets\Script\Item.cs" />
     <Compile Include="Assets\StandaloneFileBrowser\IStandaloneFileBrowser.cs" />
+    <Compile Include="Assets\Script\Actor.cs" />
     <Compile Include="Assets\StandaloneFileBrowser\StandaloneFileBrowserLinux.cs" />
     <Compile Include="Assets\Ac.cs" />
     <Compile Include="Assets\Script\StartScene.cs" />
     <Compile Include="Assets\Script\NoteManager.cs" />
     <Compile Include="Assets\Script\other\HighlightLabelUI.cs" />
     <Compile Include="Assets\Script\CommandPage.cs" />
+    <Compile Include="Assets\Script\other\VirtualJoystick.cs" />
     <Compile Include="Assets\Script\Player.cs" />
     <Compile Include="Assets\StandaloneFileBrowser\StandaloneFileBrowserMac.cs" />
     <Compile Include="Assets\Script\GrowingSystem.cs" />
@@ -96,6 +98,7 @@
     <Compile Include="Assets\Script\other\FadeUIManager.cs" />
     <Compile Include="Assets\Script\other\FadeAndRecycleUI.cs" />
     <Compile Include="Assets\StandaloneFileBrowser\StandaloneFileBrowserEditor.cs" />
+    <Compile Include="Assets\Script\Indicator.cs" />
     <Compile Include="Assets\Script\PreloadObj.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -462,6 +465,10 @@
     </Reference>
     <Reference Include="UnityEditor.UnityConnectModule">
       <HintPath>D:\centre\Unity\Editor\2022.3.17f1\Editor\Data\Managed\UnityEngine\UnityEditor.UnityConnectModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ICSharpCode.SharpZipLib">
+      <HintPath>Assets\Plugins\ICSharpCode.SharpZipLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System.Windows.Forms">

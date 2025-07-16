@@ -17,24 +17,28 @@ public class Cam : MonoBehaviour
         Ct.act.Main.q.started +=
             c =>
             {
+                Ct.visionRotate = true;
                 Ct.ct.specifyInter = true;
                 Ct.evn.WhenVisionRotating += VisionRotating;
             };//if the key q down, detect the rotation
         Ct.act.Main.q.canceled +=
             c =>
             {
+                Ct.visionRotate = false;
                 Ct.ct.specifyInter = false;
                 Ct.evn.WhenVisionRotating -= VisionRotating;
             };//if key up, cancle detection
         Ct.act.Main.e.started +=
             c =>
             {
+                Ct.visionElevate = true;
                 Ct.ct.specifyInter = true;
                 Ct.evn.WhenVisionElevate += VisionElevate;
             };
         Ct.act.Main.e.canceled +=
            c =>
            {
+               Ct.visionElevate = false;
                Ct.ct.specifyInter = false;
                Ct.evn.WhenVisionElevate -= VisionElevate;
            };
@@ -47,7 +51,7 @@ public class Cam : MonoBehaviour
         //
 
 
-        Ct.dePa.Regist(9, () => Ct.ct.ray, "rayed");
+        Ct.dePa.Regist(9, () => Ct.ct.casted, "rayed");
 
         WorldGenerator.generators.Add(WorldGenerator.Bioming);
         Ct.evn.IWhenPlayerMoving();
@@ -58,8 +62,7 @@ public class Cam : MonoBehaviour
         Ct.dePa.Regist(3, () => Ct.ppw, "ppw");
         Ct.dePa.Regist(4, () => Ct.wmp, "moouse projection");
         Ct.dePa.Regist(5, () => Page.curPage, "current page");
-        Ct.dePa.Regist(6, () => Ct.ct.ray.tag, "reyed tag");
-
+        Ct.dePa.Regist(7, () => Ct.ct.joystick.InputVector, "joystick");
     }
     private void Update()
     {

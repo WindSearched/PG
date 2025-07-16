@@ -13,11 +13,27 @@ obj的碰撞体不再随着相机朝向
 添加可为item添加描述的和各语言名称的功能,可以从json里编写，或者mod文件夹里的texts.json
 优化破坏代码，可以连续破坏了
 为交互设置了距离限制
+添加指示器（indicator）可以在有互动机会时提示，该功能目前完善中
+在世界配置（worldData）中添加了objRenderedInAFrame变量，其控制在一帧中obj的渲染数量
+修改tab键：当选择了物品时，按下此键后会优先将其存入背包；当没有选择物品后按下此键才会进入背包页
 
 en:
 Player movement changed from characterController.Move to rigidbody.veloocity, the player's y value will not be offset
 Added update summary (changes) and expansion (mod) page to the start scene
-Added partial unicode fonts (FF00-FFFF, 256 lines)
+Added some unicode fonts (FF00-FFFF, line 256, line 123 (7A00-7AFF))
+The collision body of obj no longer follows the camera direction
+The z axis of the collision body is no longer 0.2 but customized (default 0.3)
+Added the interface for creating and accessing the world (in startscene)
+Added the preloading of the world (a command block), which can be used for some necessary commands when loading the world
+Changed the information storage type of the world's obj storage (ObjState) to object (Note: the type must be serializable)
+Make the sprite of obj animated and four-directional (that is, there are different sprites in four directions)
+Added load (obj) (name ,position) and give(entity,item,amount) commands
+Added the ability to add descriptions and names in different languages ​​to items, which can be written in json or texts.json in the mod folder
+Optimized the destruction code, which can be destroyed continuously
+Set a distance limit for interaction
+Added an indicator to prompt when there is an opportunity for interaction, this function is currently being improved
+Added the objRenderedInAFrame variable in the world configuration (worldData), which controls the number of obj rendered in one frame
+Modified the tab key: when an item is selected, pressing this key will prioritize storing it in the backpack; when no item is selected, pressing this key will enter the backpack page
 
 
 unicode来源：https://www.qqxiuzi.cn

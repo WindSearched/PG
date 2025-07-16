@@ -368,6 +368,54 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "virtualSticks",
+            "id": "e9279c90-d476-4c1c-aa03-ab3c2c302683",
+            "actions": [
+                {
+                    "name": "move",
+                    "type": "Button",
+                    "id": "19eb0186-d142-4214-8d94-36d10d61f533",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "sel",
+                    "type": "Button",
+                    "id": "af1fd101-2334-476f-984e-9a1681a64ec5",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "bbb4c783-363b-4fd4-b2cc-56a52a90bf2a",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "move",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ef4c8619-c285-48c8-9e85-774d2833803f",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "sel",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": []

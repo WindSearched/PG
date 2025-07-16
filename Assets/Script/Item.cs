@@ -147,8 +147,8 @@ public class Item
             s= Ct.GetObjData()?.name;//raycasted
             if (s == data.placeable.condition)
             {
-                Obj.Load(data.placeable.placed, Ct.ct.ray.transform.position);
-                Obj.Destroy(Ct.ct.ray, s);
+                Obj.Load(data.placeable.placed, Ct.ct.casted.transform.position);
+                Obj.Destroy(Ct.ct.casted, s);
             }
         }
     }

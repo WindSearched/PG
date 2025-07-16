@@ -92,7 +92,7 @@ public static class Mod
 
     }
     [Serializable]
-    public class Object
+    public class MObject
     {
         public InsertMode insertMode;
         public ObjData data;
@@ -162,6 +162,21 @@ public static class Mod
             }
         }
     }
+    [Serializable]
+    public class MActor
+    {
+        public object spritePath;
+        public ActorData data;
+
+        public void AddTo()
+        {
+            Actor.aTy.Add(data.name);
+            Actor.data.Add(data.name, data);
+
+            var sm = SpriteManager.Load(spritePath);
+            Actor.sprites.Add(sm);
+        }
+    }
     /// <summary>
     /// use to chenge partial or some data
     /// </summary>
@@ -186,8 +201,11 @@ public static class Mod
         string path = modPath + name;
         return LoadSprite(path);
     }
-
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
     public static string modPath = Application.streamingAssetsPath + "/mod/";
+#else 
+    public static string modPath = Application.persistentDataPath + "/mod/";
+#endif
     /// <summary>
     /// Load the immage to sprite on the path
     /// </summary>
@@ -268,7 +286,19 @@ public static class Mod
                 {
                     if (ppp.Contains(".m"))
                         continue;
-                    Data.ReadJson<Object>(ppp).AddTo(curLoadModName);
+                    try
+                    {
+                        var o = Data.ReadJson<MObject>(ppp);
+                        if(o == null)
+                        {
+                            Debug.Log("null");
+                        }
+                        o.AddTo(curLoadModName);
+                    }
+                    catch
+                    {
+
+                    }
                 }
 
             pp = p + "/items/";
@@ -282,7 +312,17 @@ public static class Mod
                     d.AddTexts();
                 }
 
-            WorldGenerator.LoadingFromPath(p + "/biomes.json");
+            pp = p + "/actors/";
+            if (Data.DIrectioryExists(pp))
+                foreach (string ppp in Directory.GetFiles(pp))
+                {
+                    if (ppp.Contains(".m"))
+                        continue;
+                    MActor a = Data.ReadJson<MActor>(ppp);
+                    a.AddTo();
+                }
+
+                    WorldGenerator.LoadingFromPath(p + "/biomes.json");
             TextManager.AddTextFromFile(p + "/texts.txt");
 
             LoadDLL(p + "/" + curLoadModName + ".dll");
@@ -305,7 +345,15 @@ public static class Mod
                 if (typeof(IPGM).IsAssignableFrom(type))
                 {
                     IPGM mod = (IPGM)Activator.CreateInstance(type);
-                    mod.OnLoad();
+                    try
+                    {
+                        mod.OnLoad();
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.LogError(ex);
+                        NoteManager.Load(ex);
+                    }
                     Debug.Log($"[ModLoader]Loaded Mod dll: {type.Name}");
                 }
                 else
