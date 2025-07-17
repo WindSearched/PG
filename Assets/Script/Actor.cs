@@ -239,27 +239,28 @@ public class Actor : MonoBehaviour
             {
                 Ct.world.loadedChunk[cp].actors.Remove(state);
                 Ct.world.loadedChunk[curp].actors.Add(state);
+                cp = curp;
             }
             if (curp != cp && WorldGenerator.actorInChunk[cp].Count != 0)
             {
                 WorldGenerator.actorInChunk[cp].Remove(gameObject);
                 WorldGenerator.actorInChunk[curp].Add(gameObject);
-            }
-            cp = curp;
         }
+            cp = curp;
+    }
     }
     private void OnDestroy()
     {
         if (!Ct.quit)
         {
-            Ct.evn.WhenVisionRotating -= OnVisionRotating;
-            Ct.evn.WhenVisionElevate -= () => spt.rotation = Obj.facing;
-            Ct.ct.Cta(animCor);
-            Ct.ct.Cta(actionCor);
-            Ct.ct.Cta(ctrlCor);
-            Ct.world.loadedChunk[cp].actors.Remove(state);
-        }
+        Ct.evn.WhenVisionRotating -= OnVisionRotating;
+        Ct.evn.WhenVisionElevate -= () => spt.rotation = Obj.facing;
+        Ct.ct.Cta(animCor);
+        Ct.ct.Cta(actionCor);
+        Ct.ct.Cta(ctrlCor);
+        Ct.world.loadedChunk[cp].actors.Remove(state);
     }
+}
 }
 [Serializable]
 public class ActorData
@@ -386,8 +387,8 @@ public static class DefaultActions
                 yield return new WaitForSeconds(1);
             }
             actor.state.position.FromVec(actor.transform.position);
-            yield return null;
-        }
+        yield return null;
+    }
         
     }
     public static Coroutine Start(System.Collections.IEnumerator enumerator) => Ct.ct.CT(enumerator);
