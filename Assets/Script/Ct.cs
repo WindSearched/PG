@@ -643,6 +643,14 @@ public static class SMath
 
             return GetVector(SMath.GetVector(r)) * dir.magnitude;
         }
+
+        public static Vector3 DirectionAdjustment(Vector3 dir, float angle)
+        {
+            float b = Angle(dir);
+            float r = b - 90 + angle;
+
+            return new Vector3(SMath.CosA(r), 0, SMath.SinA(r)) * dir.magnitude;
+        }
     }
     public static class V2
     {
