@@ -702,7 +702,7 @@ public class ObjSprite
 
 public class SpriteManager
 {
-    public Dictionary<string, List<AnimatedSprite>> managed = new();
+    public Dictionary<string, List<AnimatedSprite>> managed = new(); //[actname][toward]
     public bool towardable = false;
     public bool singleAnimation = true;
     public string initAnimation = single;
@@ -780,7 +780,7 @@ public class SpriteManager
                 pretime = 0;
             }
             else
-                pretime = t;
+                pretime = f.time;
             yield return new WaitForSeconds(t);
         }
     }
@@ -805,9 +805,8 @@ public class SpriteManager
         public string form = ".png";
         public string initAnimation = single;
 
-        public Vector2 pivot = defPivot;
+        public Vector2 pivot = new(114514, 1919810);
         public PivotSet pivotSet = PivotSet.fixedPivot;
-        public static Vector2 defPivot = new(114514, 1919180);
 
         public SpriteManager Load()
         {
@@ -832,7 +831,7 @@ public class SpriteManager
                     })
                     .ToList())
                 {
-                    Sprite sp = LoadSprite(full);
+                    Sprite sp = LoadSprite(full, pivotSet, pivot);
                     string[] x = Path.GetFileName(full).TrimEnd(form).Split(',');// format: "spriteName,actionName,time,toward.png"
 
 
@@ -851,7 +850,7 @@ public class SpriteManager
             {
                 if (content is string)
                 {
-                    Sprite sp = LoadSprite(path + content);
+                    Sprite sp = LoadSprite(path + content, pivotSet, pivot);
                     sm.managed.Add(single, new()
                     {
                         new()
@@ -867,39 +866,65 @@ public class SpriteManager
 
             return sm;
         }
-        public Sprite LoadSprite(string path)
+
+    }
+    [Serializable]
+    public class SpriteList
+    {
+        public string path;
+        public int pps = 32;//pixels per sprite
+        public bool towardable = false;
+        public List<SingleAnimation> animations;
+        public string initAnimation;
+
+        [Serializable]
+        public class SingleAnimation
         {
-            Vector2 piv;
-            switch (pivotSet)
+            public string name;
+            public Toward toward = 0;
+            public List<string> frames;
+
+            public AnimatedSprite Load(List<Sprite> list, out string name)//"1/0","2/4","time/indexofframe"
             {
-                case PivotSet.normal:
-                    piv = new(0.5f, 0.5f);
-                    break;
-                case PivotSet.adaptForAnySprite:
-                    Sprite sp = Mod.LoadSprite(path);
-                    sp = Sprite.Create(sp.texture, sp.rect, GetPivot(sp), SMath.Spr.pxPerUnit);
-                    return sp;
-                case PivotSet.fixedPivot:
-                    if (pivot == defPivot)//if pivot not set, calculate the pivot
-                    {
-                        Sprite spr = Mod.LoadSprite(path);
-                        pivot = GetPivot(spr);
-                        return Sprite.Create(spr.texture, spr.rect, pivot, SMath.Spr.pxPerUnit);
-                    }
-                    piv = pivot;
-                    break;
-                default:
-                    return null;
+                AnimatedSprite sprite = new()
+                {
+                    animated = true
+                };
+                foreach (var f in frames)
+                {
+                    string[] v = f.Split('/');
+                    float.TryParse(v[0], out float x);
+                    int.TryParse(v[1], out int y);
+
+                    sprite.Load(list[y], x);
+                }
+                name = this.name;
+                return sprite;
             }
-            return Mod.LoadSprite(path, piv);
+
+
         }
 
-
-        public enum PivotSet
+        public SpriteManager Load()
         {
-            normal,
-            adaptForAnySprite,
-            fixedPivot//use the pivot variable
+            List<Sprite> list = CutSprite(LoadSprite(Mod.modPath + path, PivotSet.normal, new()), pps);
+            SpriteManager sm = new();
+            {
+                sm.initAnimation = initAnimation;
+            }
+
+            foreach (var a in animations)
+            {
+                var s = a.Load(list, out string name);
+
+                if (!sm.managed.ContainsKey(name))
+                    sm.managed.Add(name, Enumerable.Range(0, 4)
+                     .Select(_ => new AnimatedSprite())
+                     .ToList());
+                sm.managed[name][(int)a.toward] = s;
+
+            }
+            return sm;
         }
     }
     /// <summary>
@@ -924,8 +949,16 @@ public class SpriteManager
         else
         {
             JObject jo = data as JObject;
-            SpriteData sd = JsonConvert.DeserializeObject<SpriteData>(jo.ToString());
-            sm = sd.Load();
+            try
+            {
+                SpriteList sl = JsonConvert.DeserializeObject<SpriteList>(jo.ToString());
+                sm = sl.Load();
+            }
+            catch(Exception e)
+            {
+                SpriteData sd = JsonConvert.DeserializeObject<SpriteData>(jo.ToString());
+                sm = sd.Load();
+            }
         }
 
         return sm;
@@ -935,6 +968,106 @@ public class SpriteManager
     {
         return Sprite.Create(sp.texture, sp.rect, GetPivot(sp), SMath.Spr.pxPerUnit);
     }
+    public static Sprite LoadSprite(string path, PivotSet pivotSet, Vector2 pivot, int ppu = 32)
+    {
+        Vector2 defPivot = new(114514, 1919810);
+        Vector2 piv;
+        switch (pivotSet)
+        {
+            case PivotSet.normal:
+                piv = new(0.5f, 0.5f);
+                break;
+            case PivotSet.adaptForAnySprite:
+                Sprite sp = Mod.LoadSprite(path);
+                sp = Sprite.Create(sp.texture, sp.rect, GetPivot(sp), SMath.Spr.pxPerUnit);
+                return sp;
+            case PivotSet.fixedPivot:
+                if (pivot == defPivot)//if pivot not set, calculate the pivot
+                {
+                    Sprite spr = Mod.LoadSprite(path);
+                    pivot = GetPivot(spr);
+                    return Sprite.Create(spr.texture, spr.rect, pivot, SMath.Spr.pxPerUnit);
+                }
+                piv = pivot;
+                break;
+            default:
+                return null;
+        }
+        return Mod.LoadSprite(path, piv, ppu);
+    }
+    public static List<Sprite> CutSpriteSlow(Sprite sprite, int pps)
+    {
+        var t = sprite.texture;
+        List<Sprite> list = new();
+        for (int i = 0; i < t.height; i += pps)
+        {
+            for (int j = 0; j < t.width; j += pps)
+            {
+                Texture2D nt = new(pps, pps);
+                nt.SetPixels(0, 0, pps, pps, t.GetPixels(j, i, pps, pps));
+                nt.Apply();
+                Rect rect = new Rect(0, 0, pps, pps);
+                Sprite sp = Sprite.Create(nt, rect, GetPivot(nt,rect), pps);
+
+                list.Add(sp);
+            }
+        }
+        return list;
+    }
+    public static List<Sprite> CutSprite(Sprite sprite, int pps)
+    {
+        Texture2D t = sprite.texture;
+        int texWidth = t.width;
+        int texHeight = t.height;
+
+        // 整张图像像素
+        Color32[] allPixels = t.GetPixels32();
+
+        List<Sprite> list = new();
+
+        for (int y = 0; y < texHeight; y += pps)
+        {
+            for (int x = 0; x < texWidth; x += pps)
+            {
+                int w = Math.Min(pps, texWidth - x);
+                int h = Math.Min(pps, texHeight - y);
+
+                Color32[] block = new Color32[w * h];
+
+                for (int row = 0; row < h; row++)
+                {
+                    for (int col = 0; col < w; col++)
+                    {
+                        int srcX = x + col;
+                        int srcY = y + row;
+                        int srcIndex = srcY * texWidth + srcX;
+                        int dstIndex = row * w + col;
+
+                        block[dstIndex] = allPixels[srcIndex];
+                    }
+                }
+
+                Texture2D subTex = new(w, h);
+                subTex.SetPixels32(block);
+                subTex.filterMode = FilterMode.Point;
+                subTex.Apply();
+
+                Rect rect = new(0, 0, w, h);
+                Sprite sp = Sprite.Create(subTex, rect, GetPivot(subTex,rect), pps);
+
+                list.Add(sp);
+            }
+        }
+
+        return list;
+    }
+
+    public enum PivotSet
+    {
+        normal,
+        adaptForAnySprite,
+        fixedPivot//use the pivot variable
+    }
     /// <summary>
     /// do not get the true piivot, but cna be calculate 
     /// </summary>
@@ -942,8 +1075,17 @@ public class SpriteManager
     /// <returns></returns>
     public static Vector2 GetPivot(Sprite sp)
     {
-        Rect valid = SMath.Spr.GetValidPixels(sp);
-        Rect full = sp.rect;
+        return GetPivot(sp.texture, sp.rect);
+    }
+    /// <summary>
+    /// do not get the true piivot, but cna be calculate 
+    /// </summary>
+    /// <param name="sp"></param>
+    /// <returns></returns>
+    public static Vector2 GetPivot(Texture2D texture, Rect rect)
+    {
+        Rect valid = SMath.Spr.GetValidPixels(texture,rect);
+        Rect full = rect;
 
         // 计算归一化 pivot 坐标：相对整个 sprite 的尺寸 (0-1)
         float pivotX = (valid.x + valid.width * 0.5f) / full.width;

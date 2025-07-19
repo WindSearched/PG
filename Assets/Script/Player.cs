@@ -1,8 +1,6 @@
 using IPGModAPI;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements.Experimental;
-using static SMath;
 
 public class Player : MonoBehaviour
 {
@@ -85,7 +83,7 @@ public class Player : MonoBehaviour
     }
     private void OnDisable()
     {
-        if(cor != null)
+        if (cor != null)
         {
             Ct.ct.Cta(cor);
             cor = null;

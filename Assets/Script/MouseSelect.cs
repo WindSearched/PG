@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -19,7 +18,7 @@ public class MouseSelect : MonoBehaviour
     public void WhenSwitch()
     {
         GetComponent<Image>().sprite = Item.GetSprite(select.item);
-        if(select.amt == 0)
+        if (select.amt == 0)
             transform.GetComponentInChildren<TextMeshProUGUI>().text = "";
         else
             transform.GetComponentInChildren<TextMeshProUGUI>().text = select.amt.ToString();
@@ -41,7 +40,7 @@ public class MouseSelect : MonoBehaviour
         ItemData id = Item.GetData(select.item);
         if (id.IsTool() && id.tool.arm)
         {
-            if(Ct.attackViewer.positionCount == 0)
+            if (Ct.attackViewer.positionCount == 0)
             {
                 Ct.ct.CT(Attackviewer());
                 return;
@@ -66,13 +65,13 @@ public class MouseSelect : MonoBehaviour
     public void Fray(int frayed)
     {
         select.Fray(1);
-        if(select.durab <= 0)
+        if (select.durab <= 0)
             WhenSwitch();
     }
     public void Remove(int removed)
     {
         select.Add(-removed, out int full);
-        if(full != 0 || select.amt <= 0)
+        if (full != 0 || select.amt <= 0)
             WhenSwitch();
     }
 

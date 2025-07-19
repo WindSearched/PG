@@ -46,7 +46,7 @@ public class Actor : MonoBehaviour
         Ct.ct.CT(LoadCt(state, regist));
         return loadedAct;
     }
-    private static GameObject loadedAct;
+    public static GameObject loadedAct;
     public static System.Collections.IEnumerator LoadCt(ActorState state, bool regist = true)
     {
         if (parent == null)
@@ -63,7 +63,9 @@ public class Actor : MonoBehaviour
                 yield return Ct.ct.CT(Ct.world.ChunkManager(cp));
                 Ct.world.loadedChunk.Add(cp, Ct.world.managingChunk);
             }
+            Debug.Log($"[actinit] {Ct.world.loadedChunk[act.cp].actors.Count}");
             Ct.world.loadedChunk[act.cp].actors.Add(state);
+            Debug.Log($"[actend] {Ct.world.loadedChunk[act.cp].actors.Count}");
         }
     }
     public static ActorData GetData(string type)
@@ -238,29 +240,32 @@ public class Actor : MonoBehaviour
             if (curp != cp && Ct.world.loadedChunk.Count != 0)
             {
                 Ct.world.loadedChunk[cp].actors.Remove(state);
+                Debug.Log($"[actinit] {Ct.world.loadedChunk[curp].actors.Count}");
                 Ct.world.loadedChunk[curp].actors.Add(state);
+                Debug.Log($"[actinit] {Ct.world.loadedChunk[curp].actors.Count}");
                 cp = curp;
             }
             if (curp != cp && WorldGenerator.actorInChunk[cp].Count != 0)
             {
                 WorldGenerator.actorInChunk[cp].Remove(gameObject);
                 WorldGenerator.actorInChunk[curp].Add(gameObject);
-        }
+            }
             cp = curp;
-    }
+        }
     }
     private void OnDestroy()
     {
         if (!Ct.quit)
         {
-        Ct.evn.WhenVisionRotating -= OnVisionRotating;
-        Ct.evn.WhenVisionElevate -= () => spt.rotation = Obj.facing;
-        Ct.ct.Cta(animCor);
-        Ct.ct.Cta(actionCor);
-        Ct.ct.Cta(ctrlCor);
-        Ct.world.loadedChunk[cp].actors.Remove(state);
+            Debug.Log("OnDestroy");
+            Ct.evn.WhenVisionRotating -= OnVisionRotating;
+            Ct.evn.WhenVisionElevate -= () => spt.rotation = Obj.facing;
+            Ct.ct.Cta(animCor);
+            Ct.ct.Cta(actionCor);
+            Ct.ct.Cta(ctrlCor);
+            Ct.world.loadedChunk[cp].actors.Remove(state);
+        }
     }
-}
 }
 [Serializable]
 public class ActorData
@@ -380,16 +385,17 @@ public static class DefaultActions
         while (actor.actionCor != null && loop)
         {
             actor.Move(dir);
-            if (actor.cp.magnitude >= restr)
+            actor.state.position.FromVec(actor.transform.position);
+            if ((actor.cp - Ct.cp).magnitude >= restr)
             {
                 dir = SMath.V3.GetVector(SMath.V2.RandomByDirection(-dir, 60));
                 actor.Move(dir);
                 yield return new WaitForSeconds(1);
             }
-            actor.state.position.FromVec(actor.transform.position);
-        yield return null;
-    }
-        
+            else
+                yield return null;
+        }
+
     }
     public static Coroutine Start(System.Collections.IEnumerator enumerator) => Ct.ct.CT(enumerator);
     public static void Stop(Coroutine coroutine) => Ct.ct.Cta(coroutine);

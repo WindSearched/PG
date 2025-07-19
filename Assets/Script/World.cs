@@ -2,9 +2,7 @@ using MessagePack;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Unity.VisualScripting;
 using UnityEngine;
-using static WorldGenerator.BiomeData;
 
 public class World : MonoBehaviour
 {
@@ -26,7 +24,7 @@ public class World : MonoBehaviour
 
     public System.Collections.IEnumerator WorldGenerating()
     {
-        while(true)
+        while (true)
         {
             Vector2Int cp = Ct.cp;
             Ct.pp = WorldGenerator.ToPlanPos(Ct.ppw);
@@ -75,7 +73,7 @@ public class World : MonoBehaviour
     }
     public void Saving()
     {
-        foreach(var v in loadedChunk.Keys)
+        foreach (var v in loadedChunk.Keys)
         {
             Data.WriteBinary(Ct.world.loadedChunk[v], WorldGenerator.chunksPath + WorldGenerator.ToPath(v) + ".bin");
         }
@@ -113,13 +111,13 @@ public static class WorldGenerator
         int i = 0;
         foreach (Chunk.ObjState os in ch.objs)
         {
-            if(!objInChunk.ContainsKey(cp))
+            if (!objInChunk.ContainsKey(cp))
                 objInChunk.Add(cp, new());
             if (os.ld.name == "n")
                 continue;
             objInChunk[cp].Add(Obj.Load(os, cp));
 
-            if(i++ > max)
+            if (i++ > max)
             {
                 yield return null;
                 i = 0;
@@ -132,13 +130,15 @@ public static class WorldGenerator
         int i = 0;
         foreach (ActorState os in ch.actors)
         {
-            if(!actorInChunk.ContainsKey(cp))
-                actorInChunk.Add(cp, new());
             if (os.name == "n")
                 continue;
-            actorInChunk[cp].Add(Actor.Load(os,false));
+            yield return Ct.ct.CT(Actor.LoadCt(os, false));
 
-            if(i++ > max)
+            actorInChunk[cp].Add(Actor.loadedAct);
+
+
+
+            if (i++ > max)
             {
                 yield return null;
                 i = 0;
@@ -166,7 +166,7 @@ public static class WorldGenerator
                 removed.Add(p);
             }
         }
-        foreach(Vector2Int p in actorInChunk.Keys)
+        foreach (Vector2Int p in actorInChunk.Keys)
         {
             if (!chunks.ContainsKey(p))
             {
@@ -194,10 +194,11 @@ public static class WorldGenerator
             }
             if (!actorInChunk.ContainsKey(p))
             {
+                actorInChunk.Add(p, new());
                 yield return Ct.ct.CT(ActRendering(chunks[p], p));
             }
         }
-        
+
         yield return null;
     }
     public static bool ExisistChunkFile(Vector2Int cp)
@@ -228,16 +229,16 @@ public static class WorldGenerator
             return default;
         }
     }
-    
+
     public static void LoadingFromPath(string path)
     {
         if (!Data.FileExists(path))
             return;
         BiomeData[] bd = Data.ReadJson<BiomeData[]>(path);
-        foreach(BiomeData v in bd)
+        foreach (BiomeData v in bd)
         {
             biomeNames.Add(v.name);
-            biomes.Add(v.name,v);
+            biomes.Add(v.name, v);
         }
     }
     public static string GetBiome(int index) => biomeNames[index];
@@ -255,21 +256,21 @@ public static class WorldGenerator
         public List<Obj> entities = new();
         public string GetObj(int seed)
         {
-                Obj o = objects[SMath.Random(seed, objects.Count, 0)];
-                float p = SMath.Random(1, 0f);
-                if (o.generatePossibility > p)
-                {
-                    return o.type;
-                }
-                else
-                    return "n";
+            Obj o = objects[SMath.Random(seed, objects.Count, 0)];
+            float p = SMath.Random(1, 0f);
+            if (o.generatePossibility > p)
+            {
+                return o.type;
+            }
+            else
+                return "n";
         }
         public string GetEntity(int seed)
         {
             if (entities.Count == 0)
                 return null;
 
-            Obj o = entities[SMath.Random(seed, entities.Count-1, 0)];
+            Obj o = entities[SMath.Random(seed, entities.Count - 1, 0)];
             float p = SMath.Random(1, 0f);
 
             if (o.generatePossibility > p)
@@ -360,7 +361,8 @@ public class Chunk
         chunkx = p.x;
         chunky = p.y;
     }
-    [Serializable][MessagePackObject]
+    [Serializable]
+    [MessagePackObject]
     public class ObjState
     {
         [Key(0)] public Dictionary<string, object> states = new();
@@ -384,11 +386,11 @@ public class Chunk
         }
         public void Regist(string name, object val)
         {
-            if(states.ContainsKey(name))
+            if (states.ContainsKey(name))
             {
                 Debug.Log("The state has just regist in");
                 return;
-            }    
+            }
             else
             {
                 states.Add(name, val);
@@ -402,7 +404,7 @@ public class Chunk
     public class EntityState
     {
         float x, y, z;
-        [Key(0)] public Dictionary<string,object> states;
+        [Key(0)] public Dictionary<string, object> states;
         [Key(1)] public string name;
         public EntityState() { }
 
@@ -423,7 +425,7 @@ public class Chunk
             return states[name];
         }
     }
-    public void LoadinObj(ObjState obj,out int index)
+    public void LoadinObj(ObjState obj, out int index)
     {
         index = objs.Count;
         objs.Add(obj);
@@ -630,7 +632,7 @@ public class WorldData
 {
     public string name = "deafault";
     public string seed = "n";
-    public int units_of_biome = 128;
+    public int units_of_biome = 64;
     public int units_of_chunk = 16;
     public int worldMaxGenerateTimeOfChunk = 300;
     public int worldMinGenerateTimeOfChunk = 100;

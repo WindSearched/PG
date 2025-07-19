@@ -1,8 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public class Indicator : MonoBehaviour
@@ -29,7 +27,7 @@ public class Indicator : MonoBehaviour
     {
         get
         {
-            return rt.position; 
+            return rt.position;
         }
         set
         {
@@ -55,7 +53,7 @@ public class Indicator : MonoBehaviour
     public static Dictionary<string, Sprite> indicates = new();
     public static void AddIndicate(string key, Sprite spr)
     {
-        if(indicates.ContainsKey(key))
+        if (indicates.ContainsKey(key))
             indicates[key] = spr;
         else
             indicates.Add(key, spr);

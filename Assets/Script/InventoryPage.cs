@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using static Inventory;
 
 public class InventoryPage : MonoBehaviour
 {
@@ -35,9 +34,9 @@ public class InventoryPage : MonoBehaviour
             }
             else
             {
-                if(Page.IsPage("main") && Ct.mouseSelected.select.item != "n")
+                if (Page.IsPage("main") && Ct.mouseSelected.select.item != "n")
                 {
-                    Ct.curWd.inventory.Add(Ct.mouseSelected.select,out int full);
+                    Ct.curWd.inventory.Add(Ct.mouseSelected.select, out int full);
                     Ct.mouseSelected.Remove();
                     if (full == 0)
                         Ct.mouseSelected.select = new();
@@ -109,9 +108,9 @@ public class InventoryPage : MonoBehaviour
             var id = Item.GetData(g.item).tool;
             var im = grid.GetChild(2).GetComponent<Image>();
             if (id != null)
-                im .fillAmount = g.durab / id.durability;
+                im.fillAmount = g.durab / id.durability;
             else
-                im .fillAmount = 0;
+                im.fillAmount = 0;
         }
     }
     /// <summary>

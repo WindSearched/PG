@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class EscPage : MonoBehaviour
 {
@@ -18,7 +15,7 @@ public class EscPage : MonoBehaviour
     }
     public void ExitB()
     {
-        if(exitConfirm)
+        if (exitConfirm)
         {
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;

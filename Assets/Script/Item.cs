@@ -1,4 +1,3 @@
-using IPGModAPI;
 using MessagePack;
 using Newtonsoft.Json;
 using System;
@@ -145,7 +144,7 @@ public class Item
         else
         {
             string s = "";
-            s= Ct.GetObjData()?.name;//raycasted
+            s = Ct.GetObjData()?.name;//raycasted
             if (s == data.placeable.condition)
             {
                 Obj.Load(data.placeable.placed, Ct.ct.casted.transform.position);
@@ -160,7 +159,7 @@ public class Item
             Vector3 p = e.gameObject.transform.position;
             Vector3 ward = p - Ct.ppw;
             float l = ward.magnitude;
-            if(l <= data.tool.attackLength)
+            if (l <= data.tool.attackLength)
             {
                 float h = data.tool.attackAngle / 2;
                 float mina = Ct.wmp_a - h;
@@ -268,7 +267,7 @@ public class ItemData
         float initAngle = Ct.wmp_a - tool.attackAngle / 2;
         Debug.Log("length: " + tool.attackLength);
 
-        for(int i = 0; i< rendered; i++)
+        for (int i = 0; i < rendered; i++)
         {
             float angle = initAngle + apr * i;
             float x = SMath.CosA(angle) * tool.attackLength;
@@ -286,13 +285,13 @@ public class ItemData
 [MessagePackObject]
 public class Inventory
 {
-    [Key(0)]public List<Grid> invt = new();
+    [Key(0)] public List<Grid> invt = new();
     public event Update WhenInvChange;
     [Key(1)] public static Transform collection;
 
     [Key(2)] public bool full = false;
 
-    public Inventory(){ }
+    public Inventory() { }
     public Grid GetGrid(int index)
     {
         return invt[index];
@@ -305,9 +304,9 @@ public class Inventory
     /// <param name="full">if return 0, the inventory is full</param>
     public void Add(string item, int amt, out int full)
     {
-        Grid grid = new(amt,item);
+        Grid grid = new(amt, item);
         Add(grid, out full);
-        if(full> 0)
+        if (full > 0)
         {
             Drops.Load(item, full, Ct.ppw);
         }
@@ -350,7 +349,7 @@ public class Inventory
     {
         Grid g = SearchItemGrid(grid.item);
         g ??= SearchEmptyGrid(grid.item);
-        if(g == null)
+        if (g == null)
         {
             full = grid.amt;
             this.full = true;
@@ -413,7 +412,7 @@ public class Inventory
     {
         foreach (Grid grid in invt)
         {
-            if(grid.item == item && grid.amt < Item.GetData(item).maxAmt)
+            if (grid.item == item && grid.amt < Item.GetData(item).maxAmt)
                 return true;
         }
         return false;

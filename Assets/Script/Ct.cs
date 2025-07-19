@@ -10,7 +10,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using TMPro;
@@ -167,7 +166,10 @@ public class Ct : MonoBehaviour
         Page.Add("command", () => { commandPage.SetActive(true); }, () => { commandPage.SetActive(false); });
         Page.curPage = "main";
 
-        Mod.LoadMods();
+        if(!Mod.modLoaded)
+            Mod.LoadMods();
+        Mod.LoadModsInWorld();
+
         Item.InctInitializzation();
         Obj.LoadDefualtInteractions();
         Actor.InitActions();
@@ -727,10 +729,11 @@ public static class SMath
         /// <returns></returns>
         public static Rect GetValidPixels(Sprite sprite)
         {
-            Texture2D texture = sprite.texture;
-
+            return GetValidPixels(sprite.texture, sprite.rect);
+        }
+        public static Rect GetValidPixels(Texture2D texture, Rect spriteRect)
+        {
             //get sprite area
-            Rect spriteRect = sprite.rect;
             int startX = (int)spriteRect.x;
             int startY = (int)spriteRect.y;
             int width = (int)spriteRect.width;
@@ -767,6 +770,7 @@ public static class SMath
 
             return new(minX, minY, maxX - minX + 1, maxY - minY + 1);
         }
+
     }
 }
 public enum MouseState
@@ -946,7 +950,7 @@ public static class Data
                 StandardResolver.Instance
             )
         );
-        byte[] bytes = MessagePackSerializer.Serialize(data,options);
+        byte[] bytes = MessagePackSerializer.Serialize(data, options);
         File.WriteAllBytes(path, bytes);
     }
     public static T ReadBinary<T>(string path)
@@ -955,7 +959,7 @@ public static class Data
             return default;
         var options = MessagePackSerializerOptions.Standard.WithResolver(
             CompositeResolver.Create(
-                TypelessObjectResolver.Instance, 
+                TypelessObjectResolver.Instance,
                 UnityResolver.Instance,
                 StandardResolver.Instance
             )

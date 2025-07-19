@@ -10,6 +10,7 @@ using UnityEngine;
 public static class Mod
 {
     public static string curLoadModName;//the mod name
+    public static bool modLoaded = false;   
 
     [Serializable]
     public class StartScene
@@ -290,7 +291,7 @@ public static class Mod
                     try
                     {
                         var o = Data.ReadJson<MObject>(ppp);
-                        if(o == null)
+                        if (o == null)
                         {
                             Debug.Log("null");
                         }
@@ -323,15 +324,28 @@ public static class Mod
                     a.AddTo();
                 }
 
-                    WorldGenerator.LoadingFromPath(p + "/biomes.json");
             TextManager.AddTextFromFile(p + "/texts.txt");
 
             LoadDLL(p + "/" + curLoadModName + ".dll");
 
             pp = p + "/recipes.json";
             if (Data.FileExists(pp))
-            Crafting.Load(Data.ReadJson<Recipe[]>(pp));
+                Crafting.Load(Data.ReadJson<Recipe[]>(pp));
 
+        }
+        modLoaded = true;
+    }
+    public static void LoadModsInWorld()
+    {
+        string path = modPath;
+        if (!Directory.Exists(path))
+        {
+            Directory.CreateDirectory(path);
+        }
+        foreach (string p in Directory.GetDirectories(path))
+        {
+
+            WorldGenerator.LoadingFromPath(p + "/biomes.json");
         }
     }
     private static void LoadDLL(string path)

@@ -50,7 +50,7 @@ public class FadeUIManager : MonoBehaviour
     {
         if (poolDict[type].Count > 0)
             return poolDict[type].Dequeue();
-        Transform t = parent == null? canvas.transform: parent;
+        Transform t = parent == null ? canvas.transform : parent;
 
         return Instantiate(prefabDict[type], t);
     }

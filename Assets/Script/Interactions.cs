@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Interactions;
@@ -19,7 +18,7 @@ public class Interactions : MonoBehaviour
         Ct.ct.indicatorstick.OnInteractTap += () =>
         {
             var os = Ct.mcanvas.GetUIObjectsAt(Ct.ct.indicator.position);
-            foreach(var v in os)
+            foreach (var v in os)
             {
                 GameObject o = v.gameObject;
                 if (o == null)
@@ -91,10 +90,10 @@ public class Interactions : MonoBehaviour
                 Entity en = Ct.ct.casted.GetComponent<Entity>();
                 Entity.interactions[en.name]?.Invoke(en);
             }
-            else if(Ct.ct.casted.CompareTag("actor"))
+            else if (Ct.ct.casted.CompareTag("actor"))
             {
                 var act = Ct.ct.casted.GetComponent<Actor>();
-                Actor.interactions[act.type]?.Invoke(act.dat,act);
+                Actor.interactions[act.type]?.Invoke(act.dat, act);
             }
             else if (Ct.ct.casted.CompareTag("Object"))
             {

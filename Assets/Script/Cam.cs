@@ -1,5 +1,3 @@
-using IPGModAPI;
-using System;
 using UnityEngine;
 
 public class Cam : MonoBehaviour
@@ -7,7 +5,7 @@ public class Cam : MonoBehaviour
     public Vector3 cen = new();
     public Vector3 to = new();
     public float follwingSpeed;
-    
+
     public float time = 0;
     public float preangle;
     public float prelen;
@@ -100,7 +98,7 @@ public class Cam : MonoBehaviour
         else if (Ct.ct.ocped == MouseState.tap2)
         {
             SmoothVisionElevate(out bool finished);
-            if(finished)
+            if (finished)
             {
                 Ct.ct.ChangeState(MouseState.relased);
             }
@@ -156,7 +154,7 @@ public class Cam : MonoBehaviour
         }
         else
         {
-            Ct.curWd.camDist = prelen + SMath.Smooth(maxTime,time) * dist;
+            Ct.curWd.camDist = prelen + SMath.Smooth(maxTime, time) * dist;
             finished = false;
         }
     }
@@ -165,7 +163,7 @@ public class Cam : MonoBehaviour
         to += new Vector3(Ct.curWd.CamPos.x, Ct.curWd.CamPos.y, Ct.curWd.CamPos.z);
         Vector3 dis = (to - transform.position) / follwingSpeed;
         transform.position += dis;
-        
+
         //transform.position = to;
     }
     public void CamPosition()
@@ -175,7 +173,7 @@ public class Cam : MonoBehaviour
         Vector3 ar = SMath.V3.ParaAround(Vector3.zero, Ct.curWd.camAngle, Ct.curWd.camDist);//水平方面平行
         Ct.curWd.CamPos.x = ar.x;
         Ct.curWd.CamPos.z = ar.z;
-        transform.position = cen + new Vector3(Ct.curWd.CamPos.x,Ct.curWd.CamPos.y,Ct.curWd.CamPos.z);
+        transform.position = cen + new Vector3(Ct.curWd.CamPos.x, Ct.curWd.CamPos.y, Ct.curWd.CamPos.z);
 
         Watch();
     }

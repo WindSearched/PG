@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public static class GrowingSystem
@@ -10,7 +9,7 @@ public static class GrowingSystem
         float time;
         while (true)
         {
-            if(Ct.world.loadedChunk.Count == 0)
+            if (Ct.world.loadedChunk.Count == 0)
             {
                 yield return new WaitForSeconds(1);
                 continue;
@@ -19,7 +18,7 @@ public static class GrowingSystem
 
             int count = objects.childCount;
             int index = SMath.Random(count, 0);
-            if(index != 0)
+            if (index != 0)
                 Grow(objects.GetChild(index).gameObject);
 
             yield return new WaitForSeconds(time);
@@ -37,7 +36,7 @@ public static class GrowingSystem
 
             Chunk ch = Ct.world.loadedChunk[cp];
             string type = WorldGenerator.biomes[WorldGenerator.GetBiome(ch.BiomeType(ch.GetRandomPosition()))].GetEntity(SMath.RandomInt());
-            if(type != null)
+            if (type != null)
                 Summon(WorldGenerator.To3DPos(Ct.world.loadedChunk[cp].GetPositionInChunk()), type);
 
             yield return new WaitForSeconds(Ct.curWd.summmonTime);

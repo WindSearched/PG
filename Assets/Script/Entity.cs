@@ -1,8 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements.Experimental;
 
 public class Entity : MonoBehaviour
 {
@@ -56,7 +54,7 @@ public class Entity : MonoBehaviour
     public static List<GameObject> entities = new();
     public static Dictionary<string, Interact> interactions = new();
     public static void Load(string type, Vector3 pos)
-    {   
+    {
         if (!entityTypes.Contains(type))
             return;
 
@@ -89,7 +87,7 @@ public class Entity : MonoBehaviour
 
     public delegate void Interact(Entity en);
 }
-public class EntityData 
+public class EntityData
 {
 
 }

@@ -5,11 +5,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 public class StartScene : MonoBehaviour
@@ -34,6 +32,8 @@ public class StartScene : MonoBehaviour
     public FadeUIManager fadeUIManager;
     private void Start()
     {
+        Mod.LoadMods();
+
         parent = GameObject.Find("Canvas/add").transform;
         fadeUIManager = GetComponent<FadeUIManager>();
         NoteManager.Init(transform.Find("notes"));
@@ -52,7 +52,10 @@ public class StartScene : MonoBehaviour
             actived.SetActive(!actived.activeInHierarchy);
         };
 
+        TextManager.ChangeLangue(set.language);
+        worldListButtonText.text = TextManager.Read("worldListButtonText");
     }
+    public TextMeshProUGUI worldListButtonText;
     public void Init()
     {
         string path = Mod.modPath;
@@ -65,7 +68,7 @@ public class StartScene : MonoBehaviour
         foreach (string p in Directory.GetDirectories(path))
         {
             string pp = p + "/start.json";
-            if(!File.Exists(pp))
+            if (!File.Exists(pp))
                 continue;
 
             curMod = Path.GetFileName(p);
@@ -114,7 +117,7 @@ public class StartScene : MonoBehaviour
         if (t == null)
         {
             ob = PathParse.Load(o.obj, curMod) as GameObject;
-            ob = Instantiate(ob,parent);
+            ob = Instantiate(ob, parent);
         }
         else
         {
@@ -131,16 +134,16 @@ public class StartScene : MonoBehaviour
         rt.rotation = Quaternion.Euler(o.rot);
         realPosition.Add(rt.anchoredPosition);
 
-        rt.localScale = new(scale,scale);
+        rt.localScale = new(scale, scale);
         rt.localPosition *= scale;
         rectScaleChanged.Add(rt);
     }
     public static void GetScale()
     {
         Vector2 size = GameObject.Find("Canvas").GetComponent<RectTransform>().sizeDelta;
-        Vector2 deaf = new(600,400);
+        Vector2 deaf = new(600, 400);
         Vector2 rela = size / deaf;
-        if(rela.x < rela.y)
+        if (rela.x < rela.y)
             scale = rela.x;
         else
             scale = rela.y;
@@ -150,7 +153,7 @@ public class StartScene : MonoBehaviour
     {
         GetScale();
         Debug.Log("scale: " + scale);
-        for(int i = 0; i < rectScaleChanged.Count; i++)
+        for (int i = 0; i < rectScaleChanged.Count; i++)
         {
             RectTransform r = rectScaleChanged[i];
             r.localScale = new(scale, scale);
@@ -195,7 +198,7 @@ public class StartScene : MonoBehaviour
     }
     public void AddMod()
     {
-        var path = StandaloneFileBrowser.OpenFolderPanel("Choose a mod folder ...","",false);
+        var path = StandaloneFileBrowser.OpenFolderPanel("Choose a mod folder ...", "", false);
         if (path.Length > 0)
         {
             DirectoryInfo di = new(path[0]);
@@ -241,25 +244,25 @@ public class StartScene : MonoBehaviour
     }
     public void UpdateWorldList()
     {
-        if(worldListP.gameObject.activeInHierarchy == false)
+        if (worldListP.gameObject.activeInHierarchy == false)
             return;
-        if(worldListBar == null)
+        if (worldListBar == null)
             worldListBar = Resources.Load("worldListBar") as GameObject;
 
-        for(int i = 0;i< worldListPa.childCount;i++)
+        for (int i = 0; i < worldListPa.childCount; i++)
         {
             Destroy(worldListPa.GetChild(i).gameObject);
         }
 
         int j = 0;
-        foreach(var v in Data.GetDirectories(Data.worldPath))
+        foreach (var v in Data.GetDirectories(Data.worldPath))
         {
             GameObject g = Instantiate(worldListBar, worldListPa);
             g.GetComponent<RectTransform>().anchoredPosition = new(0, j++ * -80);
 
             g.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = v.Name;
             g.transform.GetChild(2).GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() => WorldListEnter(g));
-            g.transform.GetChild(1).GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() => { DestroyWorld(g);UpdateWorldList(); });
+            g.transform.GetChild(1).GetComponent<UnityEngine.UI.Button>().onClick.AddListener(() => { DestroyWorld(g); UpdateWorldList(); });
         }
     }
     public Transform worldListP;
@@ -273,7 +276,7 @@ public class StartScene : MonoBehaviour
     }
     public void SwitchActive(GameObject o)
     {
-        if(o.activeInHierarchy)
+        if (o.activeInHierarchy)
         {
             o.SetActive(false);
         }
@@ -290,7 +293,7 @@ public class StartScene : MonoBehaviour
         if (name == "")
             return;
         string seed = inpSeed.text;
-        if(seed == "")
+        if (seed == "")
             return;
 
         WorldData wd = new()
@@ -301,7 +304,7 @@ public class StartScene : MonoBehaviour
         string p = Data.worldPath + name;
         if (Data.FileExists(p))
             return;
-        else 
+        else
             Data.Create(p);
 
         wd.Save();

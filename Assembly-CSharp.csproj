@@ -109,6 +109,7 @@
     <None Include="Assets\Packages\System.Collections.Immutable.8.0.0\useSharedDesignerContext.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap.shader" />
     <None Include="Assets\Packages\MessagePack.3.1.4\lib\netstandard2.1\MessagePack.dll" />
+    <None Include="Assets\StreamingAssets\License\UnityStandaloneFileBrowser.txt" />
     <None Include="Assets\Packages\MessagePack.Annotations.3.1.4\lib\netstandard2.0\MessagePack.Annotations.dll" />
     <None Include="Assets\Packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro_Mobile.cginc" />

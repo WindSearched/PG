@@ -1,10 +1,9 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public static class Page
-{ 
+{
     /// <summary>
     /// when enter tha page
     /// </summary>
@@ -22,7 +21,7 @@ public static class Page
         exits[curPage]?.Invoke();
         curPage = page;
         enters[page]?.Invoke();
-        Debug.Log("[Page.ChangePage] changed to : " +  page);
+        Debug.Log("[Page.ChangePage] changed to : " + page);
     }
     public static bool IsPage(string page)
     {

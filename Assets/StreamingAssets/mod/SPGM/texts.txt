@@ -5,8 +5,14 @@ stone/stone
 #p/itdescrp_
 stone/base element
 
+#p/
+worldListButtonText/WORLDS
+
 #l/zh-cn
 stone/基础的材料
 
 #p/itname_
 stone/石头
+
+#p/
+worldListButtonText/世界列表

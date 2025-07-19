@@ -1,6 +1,5 @@
 using IPGModAPI;
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -14,8 +13,8 @@ public class VirtualJoystick : MonoBehaviour, IDragHandler, IPointerUpHandler, I
     /// invoke per frame
     /// </summary>
     public event dPGM OnInputing;
-    public event dPGM OnInteractTap,OnInteractHold;
-    public bool isInputing  = false, outing;
+    public event dPGM OnInteractTap, OnInteractHold;
+    public bool isInputing = false, outing;
     public float mag = 0;
     public bool interaction = false;
 
@@ -46,7 +45,7 @@ public class VirtualJoystick : MonoBehaviour, IDragHandler, IPointerUpHandler, I
         do
         {
             OnInputing?.Invoke();
-            if(time != -1)
+            if (time != -1)
                 time += Time.deltaTime;
             if (time > holdtime && mag < Ct.set.indicatorJoystickDistance)
             {
@@ -58,7 +57,7 @@ public class VirtualJoystick : MonoBehaviour, IDragHandler, IPointerUpHandler, I
         }
         while (inputVector != Vector2.zero);
 
-        if(time != -1 && mag < Ct.set.indicatorJoystickDistance)
+        if (time != -1 && mag < Ct.set.indicatorJoystickDistance)
         {
             OnInteractTap?.Invoke();
         }
@@ -80,7 +79,7 @@ public class VirtualJoystick : MonoBehaviour, IDragHandler, IPointerUpHandler, I
             inputVector = new Vector2(pos.x, pos.y);
             float mag = inputVector.magnitude;
 
-            if(interaction)
+            if (interaction)
             {
                 if (mag > Ct.set.indicatorJoystickDistance)
                 {

@@ -11,16 +11,7 @@ public class CommandPage : MonoBehaviour
     public void Starte()
     {
         Ct.command = this;
-        commands.Add("summon", (List<string> tree) =>//val => type position(0,0,0)
-        {
-            //[0]type, [1]position
-            if (!Entity.entityTypes.Contains(tree[0]))
-                return;
-            Vector3 p = tree.Count >= 2 ? SMath.V3.Parse(tree[1]) : Ct.ppw;
-            Entity.Load(tree[0], p);
-            NoteManager.Load($"summon at {p} the {tree[0]}");
-        });
-        commands.Add("actor_summon", (List<string> tree) =>//val => type position(0,0,0)
+        commands.Add("summon", tree =>//val => type position(0,0,0)
         {
             //[0]type, [1]position
             if (!Actor.aTy.Contains(tree[0]))
@@ -40,7 +31,7 @@ public class CommandPage : MonoBehaviour
         {//0entity, 1item, 2amount
             Inventory inv = null;
             string n = tree[0];
-            if (n == "this")
+            if (n == "self")
                 inv = Ct.curWd.inventory;
 
             if (inv == null)
@@ -55,9 +46,10 @@ public class CommandPage : MonoBehaviour
                 NoteManager.Load($"give at {n} {amt} {item}");
             }
         });
-        commands.Add("text",(List<string> tree) =>//0.key, 1.langue
+        commands.Add("text", (List<string> tree) =>//0.key, 1.langue
         {
             string text = TextManager.Read(tree[1], tree[0]);
+            NoteManager.Load(text);
             Debug.Log(text);
         });
 

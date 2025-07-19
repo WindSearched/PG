@@ -23,7 +23,7 @@ public class ButtonMouseHandler : MonoBehaviour, IPointerEnterHandler, IPointerE
     {
         rectTransform = GetComponent<RectTransform>();
 
-        MouseHandlers.Add(this);    
+        MouseHandlers.Add(this);
     }
 
     private void OnEnable()

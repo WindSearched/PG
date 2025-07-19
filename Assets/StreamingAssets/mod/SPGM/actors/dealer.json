@@ -1,8 +1,21 @@
 {
     "spritePath": {
-        "content": "dealer",
-        "folder":"sprites/actor",
-        "initAnimation":"wait"
+        "path": "SPGM/sprites/dealer.png",
+        "initAnimation":"wait",
+        "animations": [
+            {
+                "name": "wait",
+                "frames":[
+                    "0/7","1/0","2/7"
+                ]
+            },
+            {
+                "name": "walk",
+                "frames":[
+                    "0.1/12","0.2/13","0.3/14","0.4/15","0.5/8","0.6/9","0.7/10","0.8/11","0.9/4","1/5","1.1/6"
+                ]
+            }
+        ]
     },
     "data":
     {

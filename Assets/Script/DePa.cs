@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -25,7 +24,7 @@ public class DePa : MonoBehaviour
         Ct.act.Main.DebugPage.performed +=
             c =>
             {
-                if(c.interaction is TapInteraction)
+                if (c.interaction is TapInteraction)
                 {
                     active = !active;
                     Active();
@@ -40,7 +39,7 @@ public class DePa : MonoBehaviour
 
         GameObject r = (GameObject)Resources.Load("Deb");
         RectTransform o = r.GetComponent<RectTransform>();
-        o.sizeDelta = new(width,deafHeight);
+        o.sizeDelta = new(width, deafHeight);
         TextMeshProUGUI t = r.GetComponent<TextMeshProUGUI>();
         t.fontSize = deafHeight;
 
@@ -78,7 +77,7 @@ public class DePa : MonoBehaviour
     }
     public void Delete(int index)
     {
-        obs[index] = () =>"";
+        obs[index] = () => "";
         names[index] = "";
         register--;
     }
