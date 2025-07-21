@@ -453,7 +453,14 @@ public class ObjData
     public string itc;
 
     public string[] initstates;
-
+    public bool Interactable{
+        get
+        {
+            if(interacters == null)
+                return false;
+            return interacters.Length == 0;
+        }
+    }
     public object spriteobj
     {
         get => spritePath == null ? name + ".png" : spritePath;
@@ -954,7 +961,7 @@ public class SpriteManager
                 SpriteList sl = JsonConvert.DeserializeObject<SpriteList>(jo.ToString());
                 sm = sl.Load();
             }
-            catch(Exception e)
+            catch
             {
                 SpriteData sd = JsonConvert.DeserializeObject<SpriteData>(jo.ToString());
                 sm = sd.Load();
@@ -995,33 +1002,30 @@ public class SpriteManager
         }
         return Mod.LoadSprite(path, piv, ppu);
     }
-    public static List<Sprite> CutSpriteSlow(Sprite sprite, int pps)
-    {
-        var t = sprite.texture;
-        List<Sprite> list = new();
-        for (int i = 0; i < t.height; i += pps)
-        {
-            for (int j = 0; j < t.width; j += pps)
-            {
-                Texture2D nt = new(pps, pps);
-                nt.SetPixels(0, 0, pps, pps, t.GetPixels(j, i, pps, pps));
-                nt.Apply();
-                Rect rect = new Rect(0, 0, pps, pps);
-                Sprite sp = Sprite.Create(nt, rect, GetPivot(nt,rect), pps);
+    //public static List<Sprite> CutSpriteSlow(Sprite sprite, int pps)
+    //{
+    //    var t = sprite.texture;
+    //    List<Sprite> list = new();
+    //    for (int i = 0; i < t.height; i += pps)
+    //    {
+    //        for (int j = 0; j < t.width; j += pps)
+    //        {
+    //            Texture2D nt = new(pps, pps);
+    //            nt.SetPixels(0, 0, pps, pps, t.GetPixels(j, i, pps, pps));
+    //            nt.Apply();
+    //            Rect rect = new Rect(0, 0, pps, pps);
+    //            Sprite sp = Sprite.Create(nt, rect, GetPivot(nt,rect), pps);
 
-                list.Add(sp);
-            }
-        }
-        return list;
-    }
+    //            list.Add(sp);
+    //        }
+    //    }
+    //    return list;
+    //}
     public static List<Sprite> CutSprite(Sprite sprite, int pps)
     {
         Texture2D t = sprite.texture;
         int texWidth = t.width;
         int texHeight = t.height;
-
-        // ÕûÕÅÍ¼ÏñÏñËØ
-        Color32[] allPixels = t.GetPixels32();
 
         List<Sprite> list = new();
 
@@ -1032,28 +1036,9 @@ public class SpriteManager
                 int w = Math.Min(pps, texWidth - x);
                 int h = Math.Min(pps, texHeight - y);
 
-                Color32[] block = new Color32[w * h];
-
-                for (int row = 0; row < h; row++)
-                {
-                    for (int col = 0; col < w; col++)
-                    {
-                        int srcX = x + col;
-                        int srcY = y + row;
-                        int srcIndex = srcY * texWidth + srcX;
-                        int dstIndex = row * w + col;
-
-                        block[dstIndex] = allPixels[srcIndex];
-                    }
-                }
-
-                Texture2D subTex = new(w, h);
-                subTex.SetPixels32(block);
-                subTex.filterMode = FilterMode.Point;
-                subTex.Apply();
-
+                Texture2D subTex = SMath.Px.GetSubTexture(t, x, y, w, h);
                 Rect rect = new(0, 0, w, h);
-                Sprite sp = Sprite.Create(subTex, rect, GetPivot(subTex,rect), pps);
+                Sprite sp = Sprite.Create(subTex, rect, GetPivot(subTex, rect), pps);
 
                 list.Add(sp);
             }

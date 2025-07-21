@@ -26,26 +26,7 @@ public class InventoryPage : MonoBehaviour
 
         Ct.act.Main.tab.performed += c =>
         {
-            string inv = "inventory";
-
-            if (Page.IsPage(inv))
-            {
-                Craft();
-            }
-            else
-            {
-                if (Page.IsPage("main") && Ct.mouseSelected.select.item != "n")
-                {
-                    Ct.curWd.inventory.Add(Ct.mouseSelected.select, out int full);
-                    Ct.mouseSelected.Remove();
-                    if (full == 0)
-                        Ct.mouseSelected.select = new();
-                    else
-                        Page.ChangePage(inv);
-                }
-                else
-                    Page.ChangePage(inv);
-            }
+            ChangeToInvPage();
         };
         Ct.act.Main.shift.started += c =>
         {
@@ -56,17 +37,44 @@ public class InventoryPage : MonoBehaviour
             Mode(false);
         };
     }
+    public void ChangeToInvPage()
+    {
+        string inv = "inventory";
+
+        if (Page.IsPage(inv))
+        {
+            Craft();
+        }
+        else
+        {
+            if (Page.IsPage("main") && Ct.mouseSelected.select.item != "n")
+            {
+                Ct.curWd.inventory.Add(Ct.mouseSelected.select, out int full);
+                Ct.mouseSelected.Remove();
+                if (full == 0)
+                    Ct.mouseSelected.select = new();
+                else
+                    Page.ChangePage(inv);
+            }
+            else
+                Page.ChangePage(inv);
+        }
+    }
     public void Binding()
     {
         string inv = "inventory";
         Page.Add(inv, () =>
         {
             gameObject.SetActive(true);
+#if UNITY_ANDROID
             Ct.ct.joystick.gameObject.SetActive(false);
+#endif
         }, () =>
         {
             gameObject.SetActive(false);
+#if UNITY_ANDROID
             Ct.ct.joystick.gameObject.SetActive(true);
+#endif
         });
         gameObject.SetActive(false);
     }

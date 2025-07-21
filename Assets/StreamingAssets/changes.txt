@@ -1,4 +1,14 @@
-//main => Test 1 changes 更新//
+//main => Test 4 changes 更新//
+修改了指针提示（indicator）的主要贴图，包含：空、可破坏、破坏中、可交互、可放置
+可以在set里主动修改帧率了（framePerSecond）
+
+测试内容：
+修改摇杆互动，可以使用所有四种互动，由2摇杆控制长短互动、1杆控制左右互动（按住为right，松开为left）
+添加破坏与打开物品栏页面(inventoryPage)
+
+
+
+//main => Test 1 to 3 changes 更新//
 ch-zh: 
 玩家移动从characterController.Move改用rigidbody.veloocity，玩家y值不会偏移了
 为开始界面添加更新简述（changes）和扩展（mod）界面

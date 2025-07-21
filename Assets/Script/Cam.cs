@@ -60,7 +60,9 @@ public class Cam : MonoBehaviour
         Ct.dePa.Regist(3, () => Ct.ppw, "ppw");
         Ct.dePa.Regist(4, () => Ct.wmp, "moouse projection");
         Ct.dePa.Regist(5, () => Page.curPage, "current page");
+#if UNITY_ANDROID
         Ct.dePa.Regist(7, () => Ct.ct.joystick.InputVector, "joystick");
+#endif
     }
     private void Update()
     {

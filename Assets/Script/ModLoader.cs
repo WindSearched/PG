@@ -2,7 +2,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using UnityEngine;
 /// <summary>
 /// Mod insert extern recources in the intern 
@@ -10,7 +9,7 @@ using UnityEngine;
 public static class Mod
 {
     public static string curLoadModName;//the mod name
-    public static bool modLoaded = false;   
+    public static bool modLoaded = false;
 
     [Serializable]
     public class StartScene
@@ -208,6 +207,15 @@ public static class Mod
 #else 
     public static string modPath = Application.persistentDataPath + "/mod/";
 #endif
+    public static byte[] LoadBytes(string path) => File.ReadAllBytes(path);
+    public static Texture2D LoadTexture(string path)
+    {
+        Texture2D t = new(2, 2);
+        if (!t.LoadImage(LoadBytes(path)))
+            return null;
+        return t;
+    }
+
     /// <summary>
     /// Load the immage to sprite on the path
     /// </summary>
@@ -219,14 +227,7 @@ public static class Mod
             return null;
         }
 
-        byte[] bytes = File.ReadAllBytes(path);
-
-        Texture2D tex = new(2, 2);
-        if (!tex.LoadImage(bytes))
-        {
-            Debug.LogError("加载图片失败");
-            return null;
-        }
+        var tex = LoadTexture(path);
 
         tex.filterMode = FilterMode.Point;
 
@@ -323,6 +324,20 @@ public static class Mod
                     MActor a = Data.ReadJson<MActor>(ppp);
                     a.AddTo();
                 }
+            pp = p + "/tiles/";
+            if (Data.DIrectioryExists(pp))
+                foreach (string ppp in Directory.GetFiles(pp))
+                {
+                    if (ppp.Contains(".m"))
+                        continue;
+                    var t = Data.ReadJson<TileTexture.TData>(ppp);
+                    if (t == null)
+                    {
+                        Debug.Log("null");
+                    }
+                    Tile.Add(Path.GetFileNameWithoutExtension(ppp), t.Load());
+
+                }
 
             TextManager.AddTextFromFile(p + "/texts.txt");
 
@@ -346,42 +361,73 @@ public static class Mod
             curLoadModName = Path.GetFileName(p);
 
             WorldGenerator.LoadingFromPath(p + "/biomes.json");
-            LoadDLL(p + "/" + curLoadModName + ".dll");
+            LoadDLL(p + "/" + curLoadModName);
         }
 
     }
+    //private static void LoadDLL(string path)
+    //{
+    //    if (File.Exists(path))
+    //    {
+    //        Assembly assembly = Assembly.LoadFrom(path);
+    //        Type[] types = assembly.GetTypes();//get all class in the ddl
+
+    //        foreach (Type type in types)
+    //        {
+    //            if (typeof(IPGM).IsAssignableFrom(type))
+    //            {
+    //                IPGM mod = (IPGM)Activator.CreateInstance(type);
+    //                try
+    //                {
+    //                    mod.OnLoad();
+    //                }
+    //                catch (Exception ex)
+    //                {
+    //                    Debug.LogError(ex);
+    //                    NoteManager.Load(ex);
+    //                }
+    //                Debug.Log($"[ModLoader]Loaded Mod dll: {type.Name}");
+    //            }
+    //            else
+    //                Debug.Log("[ModLoader]not assignable");
+    //        }
+    //    }
+    //    else
+    //        Debug.Log("[ModLoader]Do not found the dll: " + path);
+    //}
     private static void LoadDLL(string path)
     {
-        if (File.Exists(path))
+        if (File.Exists(path + ".dll"))
         {
-            Assembly assembly = Assembly.LoadFrom(path);
-            Type[] types = assembly.GetTypes();//get all class in the ddl
-
-            var loadedAssemblies = AppDomain.CurrentDomain.GetAssemblies();
-            bool isLoaded = loadedAssemblies.Any(a => a.FullName == assembly.FullName);
-            Debug.Log("DLL loaded? " + isLoaded);
-
-            foreach (Type type in types)
+            var ad = HotUpdate.LoadDLL(path);
+            var types = ad.LoadedTypes.Values.ToArray();
+            foreach (var t in types)
             {
-                if (typeof(IPGM).IsAssignableFrom(type))
+                if (t.CanAssignTo(ad.GetType(typeof(IPGM))))
                 {
-                    IPGM mod = (IPGM)Activator.CreateInstance(type);
                     try
                     {
-                        mod.OnLoad();
+                        // 创建实例（返回 ILTypeInstance）
+                        var instance = ad.Instantiate(t.FullName);
+
+                        // 调用 OnLoad 方法（你必须保证它是 public）
+                        ad.Invoke(t.FullName, "OnLoad", instance, null);
+
+                        Debug.Log($"[ModLoader]Loaded Mod dll: {t.Name}");
                     }
                     catch (Exception ex)
                     {
                         Debug.LogError(ex);
                         NoteManager.Load(ex);
                     }
-                    Debug.Log($"[ModLoader]Loaded Mod dll: {type.Name}");
                 }
                 else
+                {
                     Debug.Log("[ModLoader]not assignable");
+                }
             }
         }
         else
-            Debug.Log("[ModLoader]Do not found the dll: " + path);
+            Debug.Log("[ModLoader]Do not found the dll: " + path + ".dll");
     }
 }

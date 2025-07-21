@@ -1,4 +1,13 @@
 {
+  "scopedRegistries": [
+    {
+      "name": "ILRuntime",
+      "url": "https://registry.npmjs.org",
+      "scopes": [
+        "com.ourpalm"
+      ]
+    }
+  ],
   "dependencies": {
     "com.github.messagepack-csharp": "https://github.com/MessagePack-CSharp/MessagePack-CSharp.git?path=src/MessagePack.UnityClient/Assets/Scripts/MessagePack",
     "com.unity.assetbundlebrowser": "https://github.com/Unity-Technologies/AssetBundles-Browser.git",

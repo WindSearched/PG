@@ -7,10 +7,12 @@ public class Interactions : MonoBehaviour
 {
     public static float mar = 50;
     public static float maxMarV = 9.5f;
-
+    public static bool rightInteract = true;
+    public static Interactions itc;
     public State left, right;
     private void Start()
     {
+        itc = this;
         Ct.act.itc.rightM.performed +=
             c => MouseInt(c, false);
         Ct.act.itc.leftM.performed +=
@@ -22,7 +24,12 @@ public class Interactions : MonoBehaviour
             {
                 GameObject o = v.gameObject;
                 if (o == null)
-                    LeftTap();
+                {
+                    if (rightInteract)
+                        RightTap();
+                    else
+                        LeftTap();
+                }
                 else
                 {
                     Debug.Log(o.name);
@@ -33,10 +40,23 @@ public class Interactions : MonoBehaviour
                 }
             }
         };
-        Ct.ct.indicatorstick.OnInteractHold += () => RightTap();
+        Ct.ct.indicatorstick.OnInteractHold += () =>
+        {
+            if(rightInteract)
+                RightTap();
+            else
+                LeftTap();
+        };
+
+        Ct.ct.joystick.OnInputIn += () => rightInteract = true;
+        Ct.ct.joystick.OnInputOut += () => rightInteract = false;
+
 
         Ct.act.itc.rightM.canceled += c => right = State.relase;
         Ct.act.itc.leftM.canceled += c => left = State.relase;
+#if UNITY_ANDROID
+        Ct.dePa.Regist(12, () => rightInteract, "interact(forAndroid)");
+#endif
     }
 
     public void MouseInt(InputAction.CallbackContext cxt, bool left)
@@ -93,7 +113,8 @@ public class Interactions : MonoBehaviour
             else if (Ct.ct.casted.CompareTag("actor"))
             {
                 var act = Ct.ct.casted.GetComponent<Actor>();
-                Actor.interactions[act.type]?.Invoke(act.dat, act);
+                if(act.dat.interactable)
+                    Actor.interactions[act.type]?.Invoke(act.dat, act);
             }
             else if (Ct.ct.casted.CompareTag("Object"))
             {
@@ -112,7 +133,9 @@ public class Interactions : MonoBehaviour
         {
             Item.Interact(Item.InteractionType.leftpress, d);
         }
+#if UNITY_STANDALONE_WIN
         breakCor = Ct.ct.CT(Breaking());
+#endif  
     }
     public void RiightHold()
     {

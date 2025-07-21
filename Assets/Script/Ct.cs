@@ -1,23 +1,16 @@
-using ICSharpCode.SharpZipLib.Core;
-using ICSharpCode.SharpZipLib.Zip;
 using IPGModAPI;
 using MessagePack;
 using MessagePack.Resolvers;
 using MessagePack.Unity;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
-using System.Threading.Tasks;
 using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Interactions;
-using UnityEngine.Networking;
 
 public class Ct : MonoBehaviour
 {
@@ -29,6 +22,7 @@ public class Ct : MonoBehaviour
     public InventoryPage invp;
     public Material nonmal;
     public Material board;
+    public Material blendTile;
     public static Transform canvas;
     public static RectTransform canvasrt;
     public Transform objects;
@@ -41,6 +35,8 @@ public class Ct : MonoBehaviour
     public Indicator indicator;
     public List<Sprite> indicates;
     public Dictionary<string, Sprite> sprites;
+    public Transform tilesParent;//parent of all tiles in the world
+    public GameObject tilePrefab;//tile prefab for world gen
     public string PointedName
     {
         set
@@ -152,6 +148,7 @@ public class Ct : MonoBehaviour
         ocped = left;
         Setting.Load(out set);
         curWd = WorldData.Load(set.preWorld);
+        Application.targetFrameRate = set.framesPerSecond;
 
         cam = cameraO.GetComponent<Cam>();
         canvas = GameObject.Find("Canvas").transform;
@@ -166,7 +163,7 @@ public class Ct : MonoBehaviour
         Page.Add("command", () => { commandPage.SetActive(true); }, () => { commandPage.SetActive(false); });
         Page.curPage = "main";
 
-        if(!Mod.modLoaded)
+        if (!Mod.modLoaded)
             Mod.LoadMods();
         Mod.LoadModsInWorld();
 
@@ -189,7 +186,38 @@ public class Ct : MonoBehaviour
             casted.GetComponentInChildren<SpriteRenderer>().material = board;
             casted.GetComponentInChildren<SpriteRenderer>().material.SetFloat("_lineWidth", 0.5f);
 
-            indicator.Indicate = "breakable";
+            string indicate = "";
+            ItemData id = Item.GetData(mouseSelected.select.item);
+            if (casted.CompareTag("Object"))
+            {
+                ObjData od = Obj.GetData(casted.GetComponent<Obj>().ld.name);
+
+                if (id.name == "n")
+                {
+                    if (od.Interactable)
+                        indicate = "interactable";
+                    else
+                        indicate = "breakable";
+                }
+                else
+                {
+                    if (id.Placeable_ && id.placeable.condition == od.name)
+                        indicate = "plantable";
+                    else if (id.Placeable_)
+                        indicate = "placeable";
+                }
+            }
+            else if (casted.CompareTag("actor"))
+            {
+                ActorData ad = Actor.GetData(casted.GetComponent<Actor>().state.name);
+                Debug.Log(casted.GetComponent<Actor>().state.name);
+                if (id.Attackable)
+                    indicate = "attackable";
+                else if (ad.interactable)
+                    indicate = "interactable";
+            }
+
+            indicator.Indicate = indicate;
         };
         OnCastOut += () =>
         {
@@ -240,6 +268,8 @@ public class Ct : MonoBehaviour
         RayCast();
         RayPos();
         ppw = transform.position;
+        pp = WorldGenerator.ToPlanPos(ppw);
+        cp = WorldGenerator.ToChunkOfPos(pp);
         if (casted != null)
             dmp = (casted.transform.position - ppw).magnitude;
     }
@@ -266,6 +296,16 @@ public class Ct : MonoBehaviour
             evn.IOnGameSave();
             world.Saving();
         }
+    }
+    /// <summary>
+    /// instantiate a object
+    /// </summary>
+    public GameObject LoadInScene(GameObject gameObject, Transform parent = null)
+    {
+        if (parent == null)
+            return Instantiate(gameObject);
+        else
+            return Instantiate(gameObject, parent);
     }
 
     public static void DestroyAll(Transform parent)
@@ -772,6 +812,148 @@ public static class SMath
         }
 
     }
+    public static class Px
+    {
+        public static Texture2D GetSubTexture(Texture2D tex, int startX, int startY, int width, int height)
+        {
+            int texWidth = tex.width;
+            int texHeight = tex.height;
+
+            Color32[] allPixels = tex.GetPixels32();
+            Color32[] subPixels = new Color32[width * height];
+
+            for (int row = 0; row < height; row++)
+            {
+                for (int col = 0; col < width; col++)
+                {
+                    int srcX = startX + col;
+                    int srcY = startY + row;
+                    int dstIndex = row * width + col;
+
+                    if (srcX >= 0 && srcX < texWidth && srcY >= 0 && srcY < texHeight)
+                    {
+                        int srcIndex = srcY * texWidth + srcX;
+                        subPixels[dstIndex] = allPixels[srcIndex];
+                    }
+                    else
+                    {
+                        // 超出边界部分设为透明
+                        subPixels[dstIndex] = new Color32(0, 0, 0, 0);
+                    }
+                }
+            }
+
+            Texture2D subTex = new Texture2D(width, height, TextureFormat.ARGB32, false);
+            subTex.SetPixels32(subPixels);
+            subTex.filterMode = FilterMode.Point;
+            subTex.Apply();
+
+            return subTex;
+        }
+        public static Texture2D Fill(Texture2D tex, TRect trect, Color color = new(), bool autoExpand = false, bool alphaBlend = true)
+        {
+            int rectRight = trect.x + trect.width;
+            int rectTop = trect.y + trect.height;
+
+            bool needsExpand = rectRight > tex.width || rectTop > tex.height || trect.x < 0 || trect.y < 0;
+
+            if (!needsExpand || !autoExpand)
+            {
+                int startX = Mathf.Clamp(trect.x, 0, tex.width);
+                int startY = Mathf.Clamp(trect.y, 0, tex.height);
+                int width = Mathf.Clamp(trect.width, 0, tex.width - startX);
+                int height = Mathf.Clamp(trect.height, 0, tex.height - startY);
+
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        int px = startX + x;
+                        int py = startY + y;
+
+                        if (alphaBlend)
+                        {
+                            Color dst = tex.GetPixel(px, py);
+                            tex.SetPixel(px, py, AlphaBlend(dst, color));
+                        }
+                        else
+                        {
+                            tex.SetPixel(px, py, color);
+                        }
+                    }
+                }
+
+                tex.Apply();
+                return tex;
+            }
+
+            // 扩展逻辑
+            int offsetX = Mathf.Min(trect.x, 0);
+            int offsetY = Mathf.Min(trect.y, 0);
+            int newWidth = Mathf.Max(tex.width, trect.x + trect.width) - offsetX;
+            int newHeight = Mathf.Max(tex.height, trect.y + trect.height) - offsetY;
+
+            Texture2D newTex = new Texture2D(newWidth, newHeight, tex.format, false);
+
+            // 清空
+            Color[] clear = new Color[newWidth * newHeight];
+            for (int i = 0; i < clear.Length; i++) clear[i] = new Color(0, 0, 0, 0);
+            newTex.SetPixels(clear);
+
+            // 拷贝旧图
+            for (int y = 0; y < tex.height; y++)
+            {
+                for (int x = 0; x < tex.width; x++)
+                {
+                    newTex.SetPixel(x - offsetX, y - offsetY, tex.GetPixel(x, y));
+                }
+            }
+
+            // 填充颜色
+            int fillStartX = trect.x - offsetX;
+            int fillStartY = trect.y - offsetY;
+
+            for (int y = 0; y < trect.height; y++)
+            {
+                for (int x = 0; x < trect.width; x++)
+                {
+                    int px = fillStartX + x;
+                    int py = fillStartY + y;
+
+                    if (px < 0 || py < 0 || px >= newTex.width || py >= newTex.height) continue;
+
+                    if (alphaBlend)
+                    {
+                        Color dst = newTex.GetPixel(px, py);
+                        newTex.SetPixel(px, py, AlphaBlend(dst, color));
+                    }
+                    else
+                    {
+                        newTex.SetPixel(px, py, color);
+                    }
+                }
+            }
+
+            newTex.Apply();
+            return newTex;
+        }
+        private static Color AlphaBlend(Color dst, Color src)
+        {
+            float a = src.a + dst.a * (1f - src.a);
+
+            if (a < 1e-6f)
+                return new Color(0, 0, 0, 0); // 完全透明
+
+            float r = (src.r * src.a + dst.r * dst.a * (1f - src.a)) / a;
+            float g = (src.g * src.a + dst.g * dst.a * (1f - src.a)) / a;
+            float b = (src.b * src.a + dst.b * dst.a * (1f - src.a)) / a;
+
+            return new Color(r, g, b, a);
+        }
+
+
+
+    }
 }
 public enum MouseState
 {
@@ -801,6 +983,7 @@ public class Setting
     /// max distance to do not move
     /// </summary>
     public float indicatorJoystickDistance = 0.4f;
+    public int framesPerSecond = 60;
     public void Save()
     {
         Data.WriteJson(this, Data.setting);
@@ -815,364 +998,7 @@ public class Setting
         Ct.evn.OnGameSave += set.Save;
     }
 }
-public static class Data
-{
-    /// <summary>
-    /// thisis the worlds data path
-    /// </summary>
-#if UNITY_STANDALONE_WIN || UNITY_EDITOR
-    /// <summary>
-    /// thisis the worlds data path
-    /// </summary>
-    public static string worldPath = Application.streamingAssetsPath + "/world/";
-    /// <summary>
-    /// this is the setting dataa path
-    /// </summary>
-    public static string setting = Application.streamingAssetsPath + "/setting.json";
-#else
-    /// <summary>
-    /// thisis the worlds data path
-    /// </summary>
-    public static string worldPath = Application.persistentDataPath + "/world/";
-    /// <summary>
-    /// this is the setting dataa path
-    /// </summary>
-    public static string setting = Application.persistentDataPath + "/setting.json";
-#endif
-    public static void WriteJson<T>(T data, string path, Formatting formatting = Formatting.Indented)
-    {
 
-        var settings = new JsonSerializerSettings
-        {
-            ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
-            ContractResolver = new DefaultContractResolver
-            {
-                // 忽略只读属性（比如 normalized）
-                IgnoreSerializableInterface = true
-            }
-        };
-        string json = JsonConvert.SerializeObject(data, formatting, settings);
-        string sp = string.Empty;
-        using StreamWriter sw = new(sp + path);
-        sw.WriteLine(json);
-        sw.Close();
-    }
-    public static string GetJson<T>(T data)
-    {
-        return JsonConvert.SerializeObject(data);
-    }
-    public static T SetJson<T>(string data)
-    {
-        return JsonConvert.DeserializeObject<T>(data);
-    }
-    public static T ReadJson<T>(string path)
-    {
-        if (!FileExists(path))
-            return default;
-
-        string json = ReadTextFile(path);
-
-        try
-        {
-            return JsonConvert.DeserializeObject<T>(json);
-        }
-        catch
-        {
-            Debug.Log("errorrr");
-
-            return default;
-        }
-    }
-    public static T ConvertFromJson<T>(string json)
-    {
-        return JsonConvert.DeserializeObject<T>(json);
-    }
-    public static void SetPropertyPath(object target, string path, object value)
-    {
-        var parts = path.Split('.');
-        object current = target;
-        Type currentType = target.GetType();
-
-        for (int i = 0; i < parts.Length; i++)
-        {
-            string name = parts[i];
-            bool isLast = (i == parts.Length - 1);
-
-            FieldInfo field = currentType.GetField(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic) ?? throw new($"字段 '{name}' 不存在于类型 {currentType.Name}");
-            if (isLast)
-            {
-                object converted = ConvertValueIfNeeded(value, field.FieldType);
-                field.SetValue(current, converted);
-            }
-            else
-            {
-                object next = field.GetValue(current);
-                if (next == null)
-                {
-                    // 初始化嵌套字段（只在中间层）
-                    next = Activator.CreateInstance(field.FieldType);
-                    field.SetValue(current, next);
-                }
-
-                current = next;
-                currentType = field.FieldType;
-            }
-        }
-    }
-    public static object ConvertValueIfNeeded(object value, Type targetType)
-    {
-        if (value == null) return null;
-        Type valueType = value.GetType();
-
-        if (targetType.IsAssignableFrom(valueType))
-            return value;
-
-        if (targetType.IsEnum && value is string s)
-            return Enum.Parse(targetType, s);
-
-        if (valueType == typeof(long) && targetType == typeof(int))
-            return Convert.ToInt32(value);
-
-        if (valueType == typeof(double) && targetType == typeof(float))
-            return Convert.ToSingle(value);
-
-        return Convert.ChangeType(value, targetType);
-    }
-    //BinaryFormatter formatter = new();
-    //using FileStream stream = new(path, FileMode.Create);
-    //formatter.Serialize(stream, data);
-    public static void WriteBinary<T>(T data, string path)
-    {
-        var options = MessagePackSerializerOptions.Standard.WithResolver(
-            CompositeResolver.Create(
-                TypelessObjectResolver.Instance,
-                UnityResolver.Instance,
-                StandardResolver.Instance
-            )
-        );
-        byte[] bytes = MessagePackSerializer.Serialize(data, options);
-        File.WriteAllBytes(path, bytes);
-    }
-    public static T ReadBinary<T>(string path)
-    {
-        if (!FileExists(path))
-            return default;
-        var options = MessagePackSerializerOptions.Standard.WithResolver(
-            CompositeResolver.Create(
-                TypelessObjectResolver.Instance,
-                UnityResolver.Instance,
-                StandardResolver.Instance
-            )
-        );
-        //BinaryFormatter formatter = new();
-        //using FileStream stream = new(path, FileMode.Open);
-        //return (T)formatter.Deserialize(stream);
-
-        byte[] bytes = File.ReadAllBytes(path);
-        return MessagePackSerializer.Deserialize<T>(bytes, options);
-    }
-    public static string ReadTextFile(string filePath)
-    {
-        string result = "";
-
-        // 判断路径是否包含 "://" 或 ":///"，以确定是否在 Android 或网络环境中
-        if (filePath.Contains("://") || filePath.Contains(":///"))
-        {
-            // Android 或 Web 环境，使用 UnityWebRequest 读取文件
-            UnityWebRequest www = UnityWebRequest.Get(filePath);
-            www.SendWebRequest();
-
-            // 等待请求完成
-            while (!www.isDone) { }
-
-            if (www.result == UnityWebRequest.Result.Success)
-            {
-                result = www.downloadHandler.text;
-            }
-            else
-            {
-                Debug.LogError("Error reading file: " + www.error);
-            }
-        }
-        else
-        {
-            // 其他平台，如 Windows，直接读取文件
-            result = File.ReadAllText(filePath);
-        }
-
-        return result;
-    }
-    public static string LoadFile(string path)
-    {
-        if (!FileExists(path))
-            return null;
-
-        return File.ReadAllText(path);
-    }
-
-    public static bool DIrectioryExists(string path)
-    {
-        return Directory.Exists(path.TrimEnd('/'));
-    }
-    public static bool FileExists(string path)
-    {
-        return File.Exists(path.TrimEnd('/'));
-    }
-    /// <summary>
-    /// create a directory
-    /// </summary>
-    /// <param name="path"></param>
-    public static void Create(string path)
-    {
-        Directory.CreateDirectory(path);
-    }
-    public static FileInfo[] GetFiles(string directory)
-    {
-        DirectoryInfo di = new(directory);
-        return di.GetFiles();
-    }
-    public static DirectoryInfo[] GetDirectories(string directory)
-    {
-        DirectoryInfo di = new(directory);
-        return di.GetDirectories();
-    }
-    public static void CopyAll(string source, string dest)
-    {
-        if (!DIrectioryExists(source))
-            return;
-        if (!DIrectioryExists(dest))
-            Create(dest);
-
-        DirectoryInfo di = new(source);
-
-        foreach (FileInfo fi in di.GetFiles())
-        {
-            fi.CopyTo(dest + "/" + fi.Name, true);
-        }
-
-        foreach (DirectoryInfo d in di.GetDirectories())
-        {
-            CopyAll(d.FullName, dest + "/" + d.Name);
-        }
-
-    }
-    public static void Delete(string path)
-    {
-        if (DIrectioryExists(path))
-            Directory.Delete(path, true);
-        else if (FileExists(path))
-            File.Delete(path);
-    }
-    /// <summary>
-    /// unzip a zip file
-    /// </summary>
-    /// <param name="to">path of unziped files</param>
-    public static void Uncompression(string from, string to)
-    {
-        if (!File.Exists(from))
-        {
-            Debug.LogError("ZIP 文件不存在！");
-            return;
-        }
-
-        FileStream fs = File.OpenRead(from);
-        ZipFile zipFile = new(fs);
-
-        foreach (ZipEntry entry in zipFile)
-        {
-            if (!entry.IsFile)
-                continue; // 跳过文件夹
-
-            string entryFileName = entry.Name;
-
-            // 清理非法路径
-            string fullPath = Path.Combine(to, entryFileName);
-
-            // 替换所有反斜杠，保证在 Android 上正确
-            fullPath = fullPath.Replace("\\", "/");
-
-            string directoryName = Path.GetDirectoryName(fullPath);
-
-            // 安全路径检查
-            if (string.IsNullOrEmpty(directoryName))
-            {
-                Debug.LogWarning("路径为空，跳过: " + entryFileName);
-            }
-            else
-            {
-                try
-                {
-                    if (!Directory.Exists(directoryName))
-                        Directory.CreateDirectory(directoryName);
-                }
-                catch (System.Exception ex)
-                {
-                    Debug.LogError($"创建目录失败: {directoryName}, 错误: {ex.Message}");
-                    NoteManager.Load("error");
-                }
-            }
-
-            byte[] buffer = new byte[4096]; // 4KB 缓冲区
-
-            using (Stream zipStream = zipFile.GetInputStream(entry))
-            using (FileStream streamWriter = File.Create(fullPath))
-            {
-                StreamUtils.Copy(zipStream, streamWriter, buffer);
-            }
-        }
-
-        zipFile.Close();
-        fs.Close();
-    }
-    public static async void UncompressionFromApk(string path, string to)
-    {
-        await CopyFile(path);
-        Uncompression(Application.persistentDataPath + "/" + path, Application.persistentDataPath);
-    }
-    /// <summary>
-    /// copy file in streamingassetspath to pesdentdatapath
-    /// </summary>
-    /// <param name="path"></param>
-    public static async Task CopyFile(string path)
-    {
-        string sourcePath = Path.Combine(Application.streamingAssetsPath, path);
-        string targetPath = Path.Combine(Application.persistentDataPath, path);
-
-        byte[] fileData = await LoadFileAsync(sourcePath);
-
-        if (fileData != null)
-        {
-            File.WriteAllBytes(targetPath, fileData);
-            Debug.Log($"文件已复制到: {targetPath}");
-        }
-        else
-        {
-            Debug.LogError("文件读取失败，无法复制。");
-        }
-    }
-
-    private static async Task<byte[]> LoadFileAsync(string path)
-    {
-        using (UnityWebRequest request = UnityWebRequest.Get(path))
-        {
-            var operation = request.SendWebRequest();
-
-            while (!operation.isDone)
-                await Task.Yield();
-
-            if (request.result == UnityWebRequest.Result.Success)
-            {
-                return request.downloadHandler.data; // 返回二进制数据
-            }
-            else
-            {
-                Debug.LogError($"读取失败: {request.error}");
-                return null;
-            }
-        }
-    }
-
-}
 public delegate void SMethod();
 
 

@@ -197,6 +197,18 @@ public class ItemData
     public Consumable consumable;
     public Dictionary<string, Trasformable> trasformables = new();
     public int burnPw;
+
+    public bool Attackable{
+        get
+        {
+            if(tool != null)
+            {
+                return tool.arm && tool.damage > 0;
+            }
+            return false;
+        }
+    }
+    public bool Placeable_ => placeable != null;
     public enum Interaction
     {
         n,
@@ -526,6 +538,18 @@ public class Inventory
             this.amt = amt;
             this.item = item;
             this.durab = durab;
+        }
+        public override string ToString()
+        {
+            string s = $"{amt},{item},{durab}";
+            return SPack.Paking(s);
+        }
+        public void Parse(string data)
+        {
+            var l = SPack.Depack(data);
+            amt = int.Parse(l[0]);
+            item = l[1];
+            durab = int.Parse(l[2]);
         }
     }
     public void Invchange()

@@ -3,6 +3,7 @@ using SFB;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using TMPro;
@@ -83,32 +84,79 @@ public class StartScene : MonoBehaviour
     {
         ia.Disable();
     }
+    //public void StartMods()
+    //{
+    //    string path = Mod.modPath;
+
+    //    foreach (string p in Directory.GetDirectories(path))
+    //    {
+    //        string pt = p + "/" + Path.GetFileName(p) + ".dll";
+    //        if (File.Exists(pt))
+    //        {
+    //            Assembly assembly = Assembly.Load(File.ReadAllBytes(pt));
+
+    //            Type[] types = assembly.GetTypes();//get all class in the ddl
+
+    //            foreach (Type type in types)
+    //            {
+    //                if (typeof(IPGM).IsAssignableFrom(type))
+    //                {
+    //                    IPGM mod = (IPGM)Activator.CreateInstance(type);
+    //                    mod.OnStart();
+    //                    Debug.Log($"[ModLoader]Start Mod dll: {type.Name}");
+    //                }
+    //            }
+    //        }
+    //        else
+    //            Debug.Log("[ModLoader]Do not found the dll: " + pt);
+    //    }
+    //}
     public void StartMods()
     {
         string path = Mod.modPath;
 
         foreach (string p in Directory.GetDirectories(path))
         {
-            string pt = p + "/" + Path.GetFileName(p) + ".dll";
-            if (File.Exists(pt))
-            {
-                Assembly assembly = Assembly.Load(File.ReadAllBytes(pt));
-                Type[] types = assembly.GetTypes();//get all class in the ddl
+            string dllPath = p + "/" + Path.GetFileName(p) + ".dll";
+            string pdbPath = dllPath.Replace(".dll", ".pdb");
 
-                foreach (Type type in types)
+            if (File.Exists(dllPath))
+            {
+                var appdomain = new ILRuntime.Runtime.Enviorment.AppDomain();
+                appdomain = HotUpdate.Start(appdomain);
+
+                using var fs = new FileStream(dllPath, FileMode.Open, FileAccess.Read);
+                using var dllStream = new MemoryStream();
+                fs.CopyTo(dllStream);
+                dllStream.Position = 0;
+
+                if (File.Exists(pdbPath))
                 {
-                    if (typeof(IPGM).IsAssignableFrom(type))
+                    using var pdbStream = new MemoryStream(File.ReadAllBytes(pdbPath));
+                    appdomain.LoadAssembly(dllStream, pdbStream, new ILRuntime.Mono.Cecil.Pdb.PdbReaderProvider());
+                }
+                else
+                {
+                    appdomain.LoadAssembly(dllStream);
+                }
+
+                foreach (var type in appdomain.LoadedTypes.Values)
+                {
+                    if (type.ReflectionType != null && typeof(IPGM).IsAssignableFrom(type.ReflectionType))
                     {
-                        IPGM mod = (IPGM)Activator.CreateInstance(type);
-                        mod.OnStart();
+                        var ins = appdomain.Instantiate(type.FullName);
+                        appdomain.Invoke(type.FullName, "OnStart", ins, null);
                         Debug.Log($"[ModLoader]Start Mod dll: {type.Name}");
                     }
                 }
             }
             else
-                Debug.Log("[ModLoader]Do not found the dll: " + pt);
+            {
+                Debug.LogWarning("[ModLoader] DLL not found: " + dllPath);
+            }
         }
     }
+
     public void Build(StartObj o)
     {
         Type t = Type.GetType(o.type);
@@ -426,27 +474,4 @@ public static class PathParse
         nor,
         AB
     }
-}
-public static class DLLpg
-{
-    public static Dictionary<string, Assembly> dlls = new();
-
-    public static dPGM Load(string method, string class_, string mod)
-    {
-        if (!dlls.ContainsKey(mod))
-        {
-            string p = Mod.modPath + mod + "/" + mod + ".dll";
-            dlls.Add(mod, Assembly.Load(File.ReadAllBytes(p)));
-        }
-
-        Type t = dlls[mod].GetType(mod + "." + class_);
-        if (t != null)
-        {
-            MethodInfo m = t.GetMethod(method);
-
-            return (dPGM)Delegate.CreateDelegate(typeof(dPGM), m);
-        }
-        return null;
-    }
-
 }

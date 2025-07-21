@@ -16,37 +16,39 @@ public class Player : MonoBehaviour
     private void Start()
     {
         ent = GetComponent<Entity>();
-        dPGM a = () =>
+        void a()
         {
             if (Page.IsPage("main"))
             {
                 ent.speed = Ct.curWd.playerSpeed;
-                detDIr = true;
             }
-        };
+        }
 
-        Ct.act.Main.direction.performed += c => a.Invoke();
+        Ct.act.Main.direction.performed += c => a();
         Ct.ct.joystick.OnInputIn += a;
 
         transform.position = Ct.curWd.plyPos;
         GetComponent<SphereCollider>().radius = Ct.curWd.approacherDistance;
     }
 
-    public void Update()
+    public void FixedUpdate()
     {
-        inp = GetDir();
-        if (inp == Vector3.zero)
+        if(Page.IsPage("main"))
         {
-            detDIr = false;
-            dir = new();
-            ent.speed = 0f;
-        }
-        if (detDIr)
-        {
-            dir = -DirectionAdjustment();
-            ent.direction = dir;
+            inp = GetDir();
+            if (inp != Vector3.zero)
+            {
+                dir = -DirectionAdjustment();
+                ent.speed = Ct.curWd.playerSpeed;
+                ent.direction = dir;
 
-            Ct.evn.IWhenPlayerMoving();
+                Ct.evn.IWhenPlayerMoving();
+            }
+            else
+            {
+                dir = new();
+                ent.speed = 0;
+            }
         }
 
         Ct.cam.Following(transform.position);

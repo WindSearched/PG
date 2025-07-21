@@ -35,7 +35,9 @@ public static class GrowingSystem
                 continue;
 
             Chunk ch = Ct.world.loadedChunk[cp];
-            string type = WorldGenerator.biomes[WorldGenerator.GetBiome(ch.BiomeType(ch.GetRandomPosition()))].GetEntity(SMath.RandomInt());
+            string ind = WorldGenerator.GetBiome(ch.BiomeType(ch.GetRandomPosition()));
+
+            string type = WorldGenerator.biomes[ind].GetEntity(SMath.RandomInt());
             if (type != null)
                 Summon(WorldGenerator.To3DPos(Ct.world.loadedChunk[cp].GetPositionInChunk()), type);
 
