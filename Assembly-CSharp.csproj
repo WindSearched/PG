@@ -151,6 +151,7 @@
     <None Include="Assets\StreamingAssets\world\deafault\preload.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_Bitmap-Mobile.shader" />
     <None Include="Assets\Packages\System.Collections.Immutable.8.0.0\lib\netstandard2.0\System.Collections.Immutable.dll" />
+    <None Include="Assets\StreamingAssets\License\MessagePack-CSharp.txt" />
     <None Include="Assets\TextMesh Pro\Fonts\LiberationSans - OFL.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMP_SDF-Mobile.shader" />
     <None Include="Assets\StreamingAssets\mod\SPGM\texts.txt" />

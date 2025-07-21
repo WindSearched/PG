@@ -263,7 +263,7 @@ public static class WorldGenerator
                 return o.type;
             }
             else
-                return "n";
+                return "";
         }
         public string GetEntity(int seed)
         {
@@ -278,7 +278,7 @@ public static class WorldGenerator
                 return o.type;
             }
             else
-                return "n";
+                return "";
         }
         [Serializable]
         public class Obj
@@ -301,7 +301,7 @@ public static class WorldGenerator
             Vector2 p = ch.GetRandomPosition(nog);
             int biome = ch.BiomeType(p);
             string type = GetObj(biome, nog);
-            if (type == "n")
+            if (type == "")
                 continue;
             ch.LoadinObj(type, p, out _);
         }
@@ -439,7 +439,7 @@ public class Chunk
     public ObjState LoadinObj(string obj, Vector2 rela_pos, out int index)
     {
         index = -1;
-        if (obj == "n")
+        if (obj == "")
             return null;
         string[] states = Obj.GetData(obj).initstates;
         ObjState os = new()

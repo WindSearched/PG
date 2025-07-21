@@ -1,0 +1,48 @@
+{
+    "spritePath": {
+        "path": "SPGM/sprites/umbra.png",
+        "initAnimation":"wait",
+        "animations": [
+            {
+                "name": "wait",
+                "frames":[
+                    "0/4","2/5","4/4"
+                ]
+            },
+            {
+                "name": "walk",
+                "frames":[
+                    "0/6","0.3/7","0.3/6"
+                ]
+            },
+            {
+                "name": "attack",
+                "frames":[
+                    "0/0","1/1","2/2"
+                ]
+            }
+        ]
+    },
+    "data":
+    {
+        "name": "umbra",
+        "actions": [
+            "RandomMoveRestricted"
+        ],
+        "controller": "RandomChooseController",
+        "interval": 8,
+        "possibility": 80,
+        "collider":{
+            "type": 0,
+            "size":{
+                "x":0.6, "y": 0.8, "z": 0.6
+            },
+            "center":{
+                "y": 0.4
+            }
+        },
+        "triggerRadius": 4,
+        "livetime": 240,
+        "speed" : 1
+    }
+}

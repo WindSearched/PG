@@ -355,7 +355,7 @@ public class Obj : MonoBehaviour
     public static ObjData GetData(int index) => data[index];
     public static ObjData GetData(string type)
     {
-        if (type == "n")
+        if (type == "")
             return null;
         else
         {

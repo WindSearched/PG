@@ -326,7 +326,6 @@ public static class Mod
 
             TextManager.AddTextFromFile(p + "/texts.txt");
 
-            LoadDLL(p + "/" + curLoadModName + ".dll");
 
             pp = p + "/recipes.json";
             if (Data.FileExists(pp))
@@ -344,9 +343,12 @@ public static class Mod
         }
         foreach (string p in Directory.GetDirectories(path))
         {
+            curLoadModName = Path.GetFileName(p);
 
             WorldGenerator.LoadingFromPath(p + "/biomes.json");
+            LoadDLL(p + "/" + curLoadModName + ".dll");
         }
+
     }
     private static void LoadDLL(string path)
     {
