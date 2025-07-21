@@ -1,5 +1,5 @@
 {
-  "preWorld": "3",
+  "preWorld": "123",
   "quitSave": true,
   "language": "zh-cn",
   "startSceneBackGround": {
@@ -27,5 +27,6 @@
     "maxColorComponent": 1.0
   },
   "indicatorJoystickVelocity": 300.0,
-  "indicatorJoystickDistance": 0.4
+  "indicatorJoystickDistance": 0.4,
+  "framesPerSecond": 60
 }

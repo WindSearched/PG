@@ -26,7 +26,7 @@ public class CommandPage : MonoBehaviour
             Vector3 p = tree.Count >= 2 ? SMath.V3.Parse(tree[1]) : Ct.ppw;
             Obj.Load(n, p);
             NoteManager.Load($"load at {p} the {n}");
-        });
+        });//load a obj
         commands.Add("give", (List<string> tree) =>
         {//0entity, 1item, 2amount
             Inventory inv = null;
@@ -45,14 +45,20 @@ public class CommandPage : MonoBehaviour
                     Drops.Load(item, amt, Ct.ppw);
                 NoteManager.Load($"give at {n} {amt} {item}");
             }
-        });
+        });//give some item
         commands.Add("text", (List<string> tree) =>//0.key, 1.langue
         {
             string text = TextManager.Read(tree[1], tree[0]);
             NoteManager.Load(text);
             Debug.Log(text);
         });
-
+        commands.Add("LoadTile", (List<string> tree) =>
+        {//[0]name/index, [1] position
+            string n = int.TryParse(tree[0], out int ind) ? Obj.oTy[ind] : tree[0];
+            Vector3 p = tree.Count >= 2 ? SMath.V3.Parse(tree[1]) : Ct.ppw;
+            Tile.Load(n, p);
+            NoteManager.Load($"load tile at {p} the {n}");
+        });//load a tile
         Ct.act.Main.enter.performed += c =>
         {
             string com = input.text;

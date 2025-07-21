@@ -17,7 +17,7 @@ public class World : MonoBehaviour
             Data.Create(WorldGenerator.chunksPath);
 
         Ct.ct.CT(GrowingSystem.Growing());
-        Ct.ct.CT(GrowingSystem.Summoning());
+        //Ct.ct.CT(GrowingSystem.Summoning());
 
         Ct.command.CommandByPath(Data.worldPath + Ct.set.preWorld + "/preload.txt");
     }
@@ -27,8 +27,6 @@ public class World : MonoBehaviour
         while (true)
         {
             Vector2Int cp = Ct.cp;
-            Ct.pp = WorldGenerator.ToPlanPos(Ct.ppw);
-            Ct.cp = WorldGenerator.ToChunkOfPos(Ct.pp);
 
             if (cp == precp)
                 yield return null;
@@ -241,7 +239,12 @@ public static class WorldGenerator
             biomes.Add(v.name, v);
         }
     }
-    public static string GetBiome(int index) => biomeNames[index];
+    public static string GetBiome(int index)
+    {
+        if (index == -1)
+            return null;
+        return biomeNames[index];
+    }
     public static int GetBiome(string biome) => biomeNames.IndexOf(biome);
 
     [Serializable]
@@ -278,7 +281,7 @@ public static class WorldGenerator
                 return o.type;
             }
             else
-                return "";
+                return null;
         }
         [Serializable]
         public class Obj
@@ -439,7 +442,7 @@ public class Chunk
     public ObjState LoadinObj(string obj, Vector2 rela_pos, out int index)
     {
         index = -1;
-        if (obj == "")
+        if (obj == null)
             return null;
         string[] states = Obj.GetData(obj).initstates;
         ObjState os = new()
@@ -522,7 +525,7 @@ public class Chunk
             y = pos.y - WorldGenerator.half_of_chunk < 0 ? -1 : 1,
         };
 
-        float _closest = WorldGenerator.units_of_biome;
+        float _closest = WorldGenerator.units_of_biome*2;
         int type = -1;
 
         Vector2Int cbp = GetBiomePosition();
@@ -639,7 +642,7 @@ public class WorldData
     /// <summary>
     /// time to try summon a entity
     /// </summary>
-    public float summmonTime = 3;
+    public float summmonTime = 20;
     public int radius_renderChunk = 3;
     public float growingTime = 32;
     /// <summary>

@@ -37,6 +37,7 @@
         },
         "triggerRadius": 4,
         "livetime": 120,
-        "speed" : 2
+        "speed" : 2,
+        "interactable": true
     }
 }

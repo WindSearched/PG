@@ -34,7 +34,10 @@ public class Drops : MonoBehaviour
             }
         }
     }
-
+    private void OnDestroy()
+    {
+        toApproach = false;
+    }
     public IEnumerator Approaching()
     {
         if (body == null) body = GetComponent<Rigidbody>();

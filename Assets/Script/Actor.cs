@@ -138,7 +138,7 @@ public class Actor : MonoBehaviour
     public Methd OnCollision, OnTrgger;
     private void Start()
     {
-        type = state.name;
+        type = name = state.name;
         transform.position = state.position.ToVec();
         if (type == "")
             type = aTy[index];
@@ -153,7 +153,7 @@ public class Actor : MonoBehaviour
         AddCollider(Actdata.collider);
 
         Ct.evn.WhenVisionRotating += OnVisionRotating;
-        Ct.evn.WhenVisionElevate += () => spt.rotation = Obj.facing;
+        Ct.evn.WhenVisionElevate += VisionRotate;
 
         starts[type].Invoke(dat, this);
         ctrlCor = Ct.ct.CT(controllers[dat.controller].Invoke(dat, this));
@@ -185,6 +185,8 @@ public class Actor : MonoBehaviour
         spt.rotation = Obj.facing;
         ToAnimate();
     }
+    public void VisionRotate() => spt.rotation = Obj.facing;
+
     public void ToAnimate()
     {
         if (state.curAction == "#stop")
@@ -229,29 +231,32 @@ public class Actor : MonoBehaviour
     }
     public void ChunkChange()
     {
-        if (Ct.world.loadedChunk.Count != 0)
-        {
-            var curp = WorldGenerator.ToChunkOfPos(transform.position);
-            if (!Ct.world.loadedChunk.ContainsKey(curp))
-            {
-                return;
-            }
+        Vector2Int newCp = WorldGenerator.ToChunkOfPos(transform.position);
 
-            if (curp != cp && Ct.world.loadedChunk.Count != 0)
-            {
-                Ct.world.loadedChunk[cp].actors.Remove(state);
-                Debug.Log($"[actinit] {Ct.world.loadedChunk[curp].actors.Count}");
-                Ct.world.loadedChunk[curp].actors.Add(state);
-                Debug.Log($"[actinit] {Ct.world.loadedChunk[curp].actors.Count}");
-                cp = curp;
-            }
-            if (curp != cp && WorldGenerator.actorInChunk[cp].Count != 0)
-            {
-                WorldGenerator.actorInChunk[cp].Remove(gameObject);
-                WorldGenerator.actorInChunk[curp].Add(gameObject);
-            }
-            cp = curp;
-        }
+        // 若 chunk 没变化，直接返回
+        if (newCp == cp)
+            return;
+
+        // 若新 chunk 未加载，跳过处理（可选）
+        if (!Ct.world.loadedChunk.ContainsKey(newCp))
+            return;
+
+        // 安全移除旧 chunk
+        if (Ct.world.loadedChunk.ContainsKey(cp))
+            Ct.world.loadedChunk[cp].actors.Remove(state);
+
+        if (WorldGenerator.actorInChunk.ContainsKey(cp))
+            WorldGenerator.actorInChunk[cp].Remove(gameObject);
+
+        // 添加到新 chunk
+        Ct.world.loadedChunk[newCp].actors.Add(state);
+
+        if (!WorldGenerator.actorInChunk.ContainsKey(newCp))
+            WorldGenerator.actorInChunk[newCp] = new List<GameObject>();
+        WorldGenerator.actorInChunk[newCp].Add(gameObject);
+
+        // 最终更新当前 chunk 索引
+        cp = newCp;
     }
     private void OnDestroy()
     {
@@ -259,7 +264,7 @@ public class Actor : MonoBehaviour
         {
             Debug.Log("OnDestroy");
             Ct.evn.WhenVisionRotating -= OnVisionRotating;
-            Ct.evn.WhenVisionElevate -= () => spt.rotation = Obj.facing;
+            Ct.evn.WhenVisionElevate -= VisionRotate;
             Ct.ct.Cta(animCor);
             Ct.ct.Cta(actionCor);
             Ct.ct.Cta(ctrlCor);
@@ -279,8 +284,10 @@ public class ActorData
     public float triggerRadius;
     public bool canFlip = true, useAnimator = false;
     public float livetime;
+    public bool interactable = true;
 
     public float speed = 1, life;
+
     public class Collider
     {
         public ColliderType type;
@@ -302,7 +309,7 @@ public class ActorData
 public class ActorState
 {
     [Key(0)] public string name = "";
-    [Key(1)] public Dictionary<string, object> states = new();
+    [Key(1)] public Dictionary<string, string> states = new();
     [Key(2)] public float livetime;
     [Key(3)] public V3 position;
     [Key(4)] public float iniangle;
@@ -365,12 +372,14 @@ public static class DefaultActions
     public static System.Collections.IEnumerator RandomMoveRestricted(ActorData data, Actor actor)
     {
         yield return null;
+        if (!actor.state.states.ContainsKey("moveloop"))
+            actor.state.states.Add("moveloop","");
 
-        bool loop = true;
         Vector3 dir = WorldGenerator.To3DPos(SMath.V2.Random(1, -1)).normalized;
         int restr = Ct.curWd.radius_renderChunk - 1;//restrict area
 
         actor.state.curAction = "walk";
+        actor.state.states["moveloop"] = "";
         actor.ToAnimate();
 
         actor.OnCollision += (_) =>
@@ -378,11 +387,10 @@ public static class DefaultActions
             actor.Move(new());
             actor.state.curAction = "wait";
             actor.ToAnimate();
-            loop = false;
+            actor.state.states["moveloop"] = null;
         };
-        Debug.Log(actor.actionCor != null);
 
-        while (actor.actionCor != null && loop)
+        while (actor.state.states["moveloop"] != null)
         {
             actor.Move(dir);
             actor.state.position.FromVec(actor.transform.position);
@@ -393,10 +401,12 @@ public static class DefaultActions
                 yield return new WaitForSeconds(1);
             }
             else
-                yield return null;
+                yield return new WaitForSeconds(interval);
+
         }
 
     }
+    
     public static Coroutine Start(System.Collections.IEnumerator enumerator) => Ct.ct.CT(enumerator);
     public static void Stop(Coroutine coroutine) => Ct.ct.Cta(coroutine);
     public static float interval = 0.05f;
